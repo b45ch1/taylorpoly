@@ -1,0 +1,6 @@
+*
+
+!*.tex
+!Makefile
+!*.bib
+!.gitignore
