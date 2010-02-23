@@ -53,10 +53,10 @@
 \maketitle
 
 \begin{abstract}
-We propose to implement vectorized algorithms for truncated univariate Taylor polynomials. They are useful for higher order algorithmic differentiation.
+We propose to implement algorithms for truncated univariate Taylor polynomials over scalars (UTPS). This algebraic structure is of fundamental importance, e.g. for higher order algorithmic differentiation or Taylor series integrators for ODEs/DAEs. The algorithms are vectorized in the higher order coefficients.
 \end{abstract}
 
-A truncated univariate Taylor polynomial (UTP) $[x]_D := \sum_{d=0}^{D-1} x_d t^d$ is an element of the polynomial factor ring $R[t]/t^D$. The variable $t$ is an external parameter, i.e. the polynomial $[x]_D$ is never evaluated for a numerical $t$. The UTPs are of high importance, e.g. for use in algorithmic differentiation (AD), high order polynomial models and Taylor series integrators of ODEs/DAEs.
+A truncated univariate Taylor polynomial (UTP) $[x]_D := \sum_{d=0}^{D-1} x_d t^d,\; x \in \R$ is an element of the polynomial factor ring $R[t]/t^D$. The variable $t$ is an external parameter, i.e. the polynomial $[x]_D$ is never evaluated for a numerical $t$. The UTPs are of high importance, e.g. for use in algorithmic differentiation (AD), high order polynomial models and Taylor series integrators of ODEs/DAEs.
 The basic idea is that they allow to compute higher order derivatives. As a simple example we differentiate the function $f: \R^N \rightarrow R, \; x \mapsto y = f(x)$ in the so-called \emph{forward mode of AD}:
 \begin{eqnarray}
 \left. \frac{\dd}{\dd t} f( x + V t) \right|_{t=0} &=& \frac{\partial f}{\partial x} V \;,
@@ -72,47 +72,51 @@ This generalizes to higher order derivatives by computing
 The off-diagonal elements of the derivative tensor $\nabla^D f(x)$ can be computed by a technique called \emph{exact interpolation} \cite{Griewank2008EDP}.
 
 \paragraph{Data Structure and Algorithms}
-The basic data structure is the tuple $(x, V)$, where $x \in \R^N$ and $V \in R^{N \times D \times P}$ and describes a collection of univariate Taylor polynomials $[x]_{D+1}$.
+The basic data structure is an array $[x]_{D+1}$ with coefficients
+\begin{eqnarray*}
+\;[x]_{D+1} &=& [x_0, x_1, \dots, x_D] \quad \quad \mbox{not vectorized} \\
+\;[x]_{D+1; P} &=& [x_0, x_{11}, \dots, x_{1P}, x_{21}, \dots, x_{DP}] \quad \quad \mbox{vectorized} \;.
+\end{eqnarray*}
+I.e. the zero'th coefficient $x_0$ is the same for all $P$ directions.
+
 To show how the algorithms have to work, we restrict to $P=1$ and look at the polynomial multiplication $z = \mul(x,y)$:
 \begin{eqnarray}
 [z]_{D+1} &\stackrel{D+1}{=}& [x]_{D+1} y_{D+1} \\
 \sum_{d=0}^D z_d t^d &\stackrel{D+1}{=}& \left( \sum_{d=0}^D x_d t^d \right) \left( \sum_{c=0}^D y_c t^c \right)   \\
 &\stackrel{D+1}{=}& \sum_{d=0}^D \sum_{k=0}^d x_k y_{d-k} t^d \\
-&\stackrel{D+1}{=}& \sum_{d=0}^D \sum_{k=1}^{d-1} x_k y_{d-k} t^d  + x_0 y_d + x_d y_0\;,
+&\stackrel{D+1}{=}& x_0 y_0 + \sum_{d=1}^D \left( \sum_{k=1}^{d-1} x_k y_{d-k} + x_0 y_d + x_d y_0 \right)  t^d \;,
 \end{eqnarray}
-We have used $\stackrel{D+1}{=}$ to express equality up to order $D$. That means that the algorithm for the multiplication is
+We have used $\stackrel{D+1}{=}$ to express equality up to order $D$. That means that an (unoptimized) algorithm for the multiplication is
 {\scriptsize
 \begin{verbatim}
-
-int li(int n, int d, int p){
-    /* computes linear index li = p + d*P + n*D*P */
-    return p + P*(d + n*D);
+inline int li(int d, int p, int P){
+    /* computes linear index li of vectorized Taylor polynomial
+    Do not use this for optimized algorithms.
+    */
+    return (d>0)*(1 + p + P*(d-1));
 }
 
-int mul(int N, int D, int P, double x, double Vx, double y, double Vy, double z, double Vz ){
-    /* computes  z = mul(x,y) */
-    int n,k,d,p,tmp;
-    /* compute base point */
-    for(n = 0; n != N; ++n){
-        z[n] = x[n]*y[n];
-    }
-    /* compute higher order coefficients */
-    for(n = 0; n != N; ++n){
-        for(d = 0; d < D; ++d){
-            /* treat summation terms containing x_0 and y_0 */
+int amul_nonopt(int D, int P, double *x, double *y, double *z ){
+    /* 
+    assignment multiplication non optimized
+    computes  z += mul(x,y) in Taylor arithmetic, not optimized
+    */
+    int k,d,p;
+    
+    /* d = 0:  compute base point */
+    z[0] += x[0] * y[0];
+
+    /* d > 0: compute higher order coefficients */
+    for(d = 0; d != D; ++d){
+        for(k = 0; k != d; ++k){
             for(p = 0; p != P; ++p){
-                tmp = li(n,d,p);
-                Vz[tmp] = x[n] * Vy[tmp] + Vx[tmp] * y[n];
-            }
-            /* accumulate the remaining summation terms */ 
-            for(k = 1; k < d-1; ++ k){
-                for(p = 0; p != P; ++p){
-                    Vz[li(n,d,p)] += Vx[li(n,k,p)] * Vy[li(n,d-k,p)]
-                }
+                z[li(d,p,P)] += x[li(k,p,P)] * y[li(d-k,p,P)];
             }
         }
     }
-}
+    
+    return 0;
+} 
 \end{verbatim}
 }
 
