@@ -24,7 +24,7 @@ class UTPS:
     """
 
     
-    def __init__(self, data, D, P):
+    def __init__(self, data, P, D):
         """
         x = [x_0, x_{1,1}, x_{1,2}, ..., x_{1,P}, ..., x_{D-1,P}]
         """
@@ -42,10 +42,10 @@ class UTPS:
         return str(self.data)
         
     def __repr__(self):
-        ret_str = 'UTPS(%s, %d, %d)'%(str(self.data), self.D, self.P)
+        ret_str = 'UTPS(%s, %d, %d)'%(str(self.data), self.P, self.D)
 
     def __zeros_like__(self):
-        return self.__class__(numpy.zeros_like(self.data), self.D, self.P)
+        return self.__class__(numpy.zeros_like(self.data), self.P, self.D)
     
 
 def mul(x,y,out = None):
@@ -57,7 +57,7 @@ def mul(x,y,out = None):
     else:
         out.data *= 0
     
-    _utps.amul(x.D,x.P,
+    _utps.amul(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
     out.data.ctypes.data_as(double_ptr))
