@@ -23,6 +23,7 @@ int amul(int P, int D, double *x, double *y, double *z ){
         /* d > 0: higher order coefficients */
         for(d = 1; d < D; ++d){
             zd = zp + d;
+            
             /* compute x_0 y_d */
             yd = yp + d;
             (*zd) +=  x[0] * (*yd);
@@ -36,13 +37,10 @@ int amul(int P, int D, double *x, double *y, double *z ){
                 yd--;
             }
             
+            /* compute x_d y_0 */
             xd = xp + d;
             (*zd) +=  (*xd) * y[0];        
         }
     }
-        
-
-
-    
     return 0;
 } 

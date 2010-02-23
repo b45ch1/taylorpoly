@@ -75,7 +75,7 @@ The off-diagonal elements of the derivative tensor $\nabla^D f(x)$ can be comput
 The basic data structure is an array $[x]_{D+1}$ with coefficients
 \begin{eqnarray*}
 \;[x]_{D+1} &=& [x_0, x_1, \dots, x_D] \quad \quad \mbox{not vectorized} \\
-\;[x]_{D+1; P} &=& [x_0, x_{11}, \dots, x_{1P}, x_{21}, \dots, x_{DP}] \quad \quad \mbox{vectorized} \;.
+\;[x]_{D+1; P} &=& [x_0, x_{11}, \dots, x_{1,D-1}, x_{21}, \dots, x_{P,D-1}] \quad \quad \mbox{vectorized} \;.
 \end{eqnarray*}
 I.e. the zero'th coefficient $x_0$ is the same for all $P$ directions.
 
@@ -89,32 +89,47 @@ To show how the algorithms have to work, we restrict to $P=1$ and look at the po
 We have used $\stackrel{D+1}{=}$ to express equality up to order $D$. That means that an (unoptimized) algorithm for the multiplication is
 {\scriptsize
 \begin{verbatim}
-inline int li(int d, int p, int P){
-    /* computes linear index li of vectorized Taylor polynomial
-    Do not use this for optimized algorithms.
-    */
-    return (d>0)*(1 + p + P*(d-1));
-}
-
-int amul_nonopt(int D, int P, double *x, double *y, double *z ){
+int amul(int P, int D, double *x, double *y, double *z ){
     /* 
-    assignment multiplication non optimized
-    computes  z += mul(x,y) in Taylor arithmetic, not optimized
+    assignment multiplication
+    computes  z += mul(x,y) in Taylor arithmetic
     */
     int k,d,p;
-    
-    /* d = 0:  compute base point */
-    z[0] += x[0] * y[0];
+    double *zd, *xd, *yd;
+    double *zp, *xp, *yp;
 
-    /* d > 0: compute higher order coefficients */
-    for(d = 0; d != D; ++d){
-        for(k = 0; k != d; ++k){
-            for(p = 0; p != P; ++p){
-                z[li(d,p,P)] += x[li(k,p,P)] * y[li(d-k,p,P)];
+    zd = z;
+    yd = y;
+    xd = x;
+    
+    /* d = 0: base point z_0 */
+    (*zd) += (*xd) * (*yd);
+
+    for(p = 0; p < P; ++p){
+        xp = x + p*(D-1);
+        yp = y + p*(D-1);        
+        zp = z + p*(D-1);
+        
+        /* d > 0: higher order coefficients */
+        for(d = 1; d < D; ++d){
+            zd = zp + d;
+            /* compute x_0 y_d */
+            yd = yp + d;
+            (*zd) +=  x[0] * (*yd);
+            
+            /* compute sum_{k=1}^{d-1} x_k y_{d-k} */
+            xd = xp + 1;
+            yd = yp + d - 1;
+            for(k = 1; k < d; ++k){
+                (*zd) += (*xd) * (*yd);
+                xd++;
+                yd--;
             }
+            
+            xd = xp + d;
+            (*zd) +=  (*xd) * y[0];        
         }
     }
-    
     return 0;
 } 
 \end{verbatim}
