@@ -7,7 +7,7 @@ _utps = numpy.ctypeslib.load_library('libutps', os.path.dirname(__file__))
 double_ptr =  ctypes.POINTER(ctypes.c_double)
 argtypes1 = [ctypes.c_int, ctypes.c_int, double_ptr, double_ptr, double_ptr]
 
-_utps.amul.argtypes = argtypes1
+_utps.add.argtypes = argtypes1
 _utps.mul.argtypes = argtypes1
 
 
@@ -48,6 +48,21 @@ class UTPS:
 
     def __zeros_like__(self):
         return self.__class__(numpy.zeros_like(self.data), self.P, self.D)
+    
+
+def add(x,y, out = None):
+    """
+    computes z = x*y in Taylor arithmetic
+    """
+    if out == None:
+        out = x.__zeros_like__()
+    
+    _utps.add(x.P,x.D,
+    x.data.ctypes.data_as(double_ptr),
+    y.data.ctypes.data_as(double_ptr),
+    out.data.ctypes.data_as(double_ptr))
+    
+    return out
     
 
 def mul(x,y,out = None):

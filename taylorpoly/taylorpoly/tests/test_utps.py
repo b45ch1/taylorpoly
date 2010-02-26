@@ -1,9 +1,20 @@
 from numpy.testing import *
 import numpy
 
-from taylorpoly.utps import UTPS, mul 
+from taylorpoly.utps import UTPS, mul, add
 
 class Test_Binary_Operators(TestCase):
+    
+    def test_add(self):
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        
+        z = add(x,y)
+        
+        assert_array_almost_equal([6.,9.,14.], z.data)
+    
+    
+    
     
     def test_mul(self):
         x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
