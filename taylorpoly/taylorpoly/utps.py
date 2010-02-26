@@ -8,6 +8,8 @@ double_ptr =  ctypes.POINTER(ctypes.c_double)
 argtypes1 = [ctypes.c_int, ctypes.c_int, double_ptr, double_ptr, double_ptr]
 
 _utps.amul.argtypes = argtypes1
+_utps.mul.argtypes = argtypes1
+
 
 class UTPS:
     """
@@ -54,13 +56,24 @@ def mul(x,y,out = None):
     """
     if out == None:
         out = x.__zeros_like__()
-    else:
-        out.data *= 0
     
-    _utps.amul(x.P,x.D,
+    _utps.mul(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
     out.data.ctypes.data_as(double_ptr))
     
     return out
     
+# def imul(x,y):
+#     """
+#     computes y *= x in Taylor arithmetic
+#     """
+#     y.data *= 0
+    
+#     _utps.amul(x.P,x.D,
+#     y.data.ctypes.data_as(double_ptr),
+#     x.data.ctypes.data_as(double_ptr),
+#     y.data.ctypes.data_as(double_ptr))
+    
+#     return out
+
