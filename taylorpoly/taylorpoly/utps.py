@@ -10,6 +10,7 @@ argtypes1 = [ctypes.c_int, ctypes.c_int, double_ptr, double_ptr, double_ptr]
 _utps.add.argtypes = argtypes1
 _utps.sub.argtypes = argtypes1
 _utps.mul.argtypes = argtypes1
+_utps.div.argtypes = argtypes1
 
 
 class UTPS:
@@ -78,9 +79,6 @@ def sub(x,y, out = None):
     out.data.ctypes.data_as(double_ptr))
     
     return out
-    
-    
-    
 
 def mul(x,y,out = None):
     """
@@ -96,16 +94,17 @@ def mul(x,y,out = None):
     
     return out
     
-# def imul(x,y):
-#     """
-#     computes y *= x in Taylor arithmetic
-#     """
-#     y.data *= 0
+def div(x,y,out = None):
+    """
+    computes z = x/y in Taylor arithmetic
+    """
+    if out == None:
+        out = x.__zeros_like__()
     
-#     _utps.amul(x.P,x.D,
-#     y.data.ctypes.data_as(double_ptr),
-#     x.data.ctypes.data_as(double_ptr),
-#     y.data.ctypes.data_as(double_ptr))
+    _utps.div(x.P,x.D,
+    x.data.ctypes.data_as(double_ptr),
+    y.data.ctypes.data_as(double_ptr),
+    out.data.ctypes.data_as(double_ptr))
     
-#     return out
+    return out
 

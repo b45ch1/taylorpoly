@@ -131,3 +131,59 @@ int mul(int P, int D, double *x, double *y, double *z ){
     return 0;
 }
 
+
+int div(int P, int D, double *x, double *y, double *z ){
+    /* 
+    computes  z = div(x,y) in Taylor arithmetic
+    
+    Latex::
+        
+        $z = x / y $ &
+        $\z_d = \frac{1}{y_0} \left[ x_d - \sum_{k=0}^{d-1} \z_j y_{d-k} \right]$
+        
+    */
+    int k,d,p;
+    double *zd, *zd2, *xd, *yd;
+    double *zp, *xp, *yp;
+    
+    /* input checks */
+    if(z == y) return -1;
+    
+    /* d = 0: compute z_0 = x_0 / y_0 */
+    (*z) = (*x)/(*y);
+
+    /* d > 0: higher order coefficients */
+    for(p = 0; p < P; ++p){
+        xp = x + p*(D-1);
+        yp = y + p*(D-1);
+        zp = z + p*(D-1);
+        for(d = 1; d < D; ++d){
+            zd = zp + d;
+            xd = xp + d;
+            
+            /* set z_d = x_d */
+            (*zd) = (*xd);
+            
+            yd = yp + d;
+            
+            /* compute x_d - z_0 y_{d} */
+            (*zd) -= (*z) * (*yd);
+            yd--;
+            
+            /* compute x_d - \sum_{k=1}^{d-1} z_k y_{d-k} */
+            zd2 = zp+1;
+            for(k = 1; k < d; ++k){
+                (*zd) -= (*zd2) * (*yd);
+                zd2++;
+                yd--;
+            }
+            
+            /* compute 1./y_0 (x_d - \sum_{k=0}^{d-1} z_k y_{d-k}) */
+            (*zd) /= (*y);
+        }
+
+    }
+    
+    return 0;
+}
+

@@ -1,7 +1,7 @@
 from numpy.testing import *
 import numpy
 
-from taylorpoly.utps import UTPS, mul, add, sub
+from taylorpoly.utps import UTPS, add, sub, mul, div
 
 class Test_Binary_Operators(TestCase):
     
@@ -105,7 +105,123 @@ class Test_Binary_Operators(TestCase):
         
         assert_array_almost_equal([5.,17.,40., 21., 36.], y.data)
         
+    def test_div(self):
+        try:
+            import sympy
         
+        except:
+            return
+        
+        x = UTPS(numpy.array([1.,4.,3.]), P = 1, D = 3)
+        y = UTPS(numpy.array([5.,1, 7.]), P = 1, D = 3)
+        
+        z = div(x,y)
+        assert_array_almost_equal([1.,4.,3.], x.data)
+        assert_array_almost_equal([5.,1, 7.], y.data)
+        
+        t = sympy.symbols('t')
+        sx = x.data[0] + x.data[1]*t + x.data[2]*t**2
+        sy = y.data[0] + y.data[1]*t + y.data[2]*t**2
+        sz = sx/sy
+        
+        correct = numpy.array([ x.data[0]/y.data[0],
+                                sz.series(t).coeff(t).evalf(),
+                                sz.series(t).coeff(t**2).evalf()])
+        assert_array_almost_equal(correct, z.data)
+        
+    def test_idiv(self):
+        try:
+            import sympy
+        
+        except:
+            return
+        
+        x  = UTPS(numpy.array([1.,4.,3.]), P = 1, D = 3)
+        x2 = UTPS(numpy.array([1.,4.,3.]), P = 1, D = 3)
+        y = UTPS(numpy.array([5.,1, 7.]), P = 1, D = 3)
+        
+        x = div(x,y,x)
+        assert_array_almost_equal([5.,1, 7.], y.data)
+        
+        t = sympy.symbols('t')
+        sx = x2.data[0] + x2.data[1]*t + x2.data[2]*t**2
+        sy = y.data[0] + y.data[1]*t + y.data[2]*t**2
+        sz = sx/sy
+        
+        correct = numpy.array([ x2.data[0]/y.data[0],
+                                sz.series(t).coeff(t).evalf(),
+                                sz.series(t).coeff(t**2).evalf()])
+        assert_array_almost_equal(correct, x.data)
+        
+    def test_div_vectorized(self):
+        try:
+            import sympy
+        
+        except:
+            return
+        
+        
+        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2, D = 3)
+        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2, D = 3)
+        
+        z = div(x,y)
+        
+        t = sympy.symbols('t')
+        sx1 = x.data[0] + x.data[1]*t + x.data[2]*t**2
+        sy1 = y.data[0] + y.data[1]*t + y.data[2]*t**2
+        sz1 = sx1/sy1
+        
+        sx2 = x.data[0] + x.data[3]*t + x.data[4]*t**2
+        sy2 = y.data[0] + y.data[3]*t + y.data[4]*t**2
+        sz2 = sx2/sy2
+        
+        
+        correct1 = numpy.array([ x.data[0]/y.data[0],
+                        sz1.series(t).coeff(t).evalf(),
+                        sz1.series(t).coeff(t**2).evalf()])
+        
+        correct2 = numpy.array([ x.data[0]/y.data[0],
+                                sz2.series(t).coeff(t).evalf(),
+                                sz2.series(t).coeff(t**2).evalf()])
+
+        assert_array_almost_equal(correct1, z.data[[0,1,2]])
+        assert_array_almost_equal(correct2, z.data[[0,3,4]])
+        
+        
+    def test_idiv_vectorized(self):
+        try:
+            import sympy
+        
+        except:
+            return
+        
+        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2, D = 3)
+        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2, D = 3)
+        
+        t = sympy.symbols('t')
+        sx1 = x.data[0] + x.data[1]*t + x.data[2]*t**2
+        sy1 = y.data[0] + y.data[1]*t + y.data[2]*t**2
+        sz1 = sx1/sy1
+        
+        sx2 = x.data[0] + x.data[3]*t + x.data[4]*t**2
+        sy2 = y.data[0] + y.data[3]*t + y.data[4]*t**2
+        sz2 = sx2/sy2
+        
+        correct1 = numpy.array([ x.data[0]/y.data[0],
+                        sz1.series(t).coeff(t).evalf(),
+                        sz1.series(t).coeff(t**2).evalf()])
+        
+        correct2 = numpy.array([ x.data[0]/y.data[0],
+                                sz2.series(t).coeff(t).evalf(),
+                                sz2.series(t).coeff(t**2).evalf()])
+        
+        
+        x = div(x,y,x)
+
+        assert_array_almost_equal(correct1, x.data[[0,1,2]])
+        assert_array_almost_equal(correct2, x.data[[0,3,4]])
+        
+
 
 if __name__ == "__main__":
     run_module_suite()
