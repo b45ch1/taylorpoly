@@ -1,7 +1,7 @@
 from numpy.testing import *
 import numpy
 
-from taylorpoly.utps import UTPS, add, sub, mul, div, log
+from taylorpoly.utps import UTPS, add, sub, mul, div, log, exp
 
 class Test_Binary_Operators(TestCase):
     
@@ -215,7 +215,6 @@ class Test_Binary_Operators(TestCase):
                                 sz2.series(t).coeff(t).evalf(),
                                 sz2.series(t).coeff(t**2).evalf()])
         
-        
         x = div(x,y,x)
 
         assert_array_almost_equal(correct1, x.data[[0,1,2]])
@@ -244,6 +243,30 @@ class Test_Binary_Operators(TestCase):
         
         assert_array_almost_equal(correct1, y.data[[0,1,2]])
         assert_array_almost_equal(correct2, y.data[[0,3,4]])
+
+    def test_exp(self):
+        x = UTPS(numpy.array([1.,2.,3.]),P = 1, D = 3)
+        y = exp(x)
+                
+        correct = numpy.array([ numpy.exp(x.data[0]),
+                                x.data[1]*numpy.exp(x.data[0]),
+                                (2*x.data[2] + x.data[1]**2) *numpy.exp(x.data[0])/2.])
+        
+        assert_array_almost_equal(correct, y.data)
+        
+    def test_exp_vectorized(self):
+        x = UTPS(numpy.array([1.,2.,3.,4.,5.]),P = 2, D = 3)
+        x1 = UTPS(numpy.array([1.,2.,3.]),P = 1, D = 3)
+        x2 = UTPS(numpy.array([1.,4.,5.]),P = 1, D = 3)
+        
+        y  = exp(x)
+        y1 = exp(x1)
+        y2 = exp(x2)
+       
+        assert_array_almost_equal(y1.data, y.data[[0,1,2]])
+        assert_array_almost_equal(y2.data, y.data[[0,3,4]])
+        
+        
 
 if __name__ == "__main__":
     run_module_suite()

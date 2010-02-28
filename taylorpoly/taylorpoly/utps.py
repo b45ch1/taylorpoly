@@ -13,7 +13,7 @@ _utps.utps_sub.argtypes = argtypes1
 _utps.utps_mul.argtypes = argtypes1
 _utps.utps_div.argtypes = argtypes1
 _utps.utps_log.argtypes = argtypes2
-
+_utps.utps_exp.argtypes = argtypes2
 
 
 class UTPS:
@@ -123,4 +123,16 @@ def log(x,out = None):
     out.data.ctypes.data_as(double_ptr))
     
     return out
-
+    
+def exp(x,out = None):
+    """
+    computes y = exp(x) in Taylor arithmetic
+    """
+    if out == None:
+        out = x.__zeros_like__()
+    
+    _utps.utps_exp(x.P,x.D,
+    x.data.ctypes.data_as(double_ptr),
+    out.data.ctypes.data_as(double_ptr))
+    
+    return out

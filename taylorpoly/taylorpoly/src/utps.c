@@ -231,8 +231,45 @@ int utps_log(int P, int D, double *x, double *y){
             *(yp + d) = tmp;
         }
     }
-
     return 0;
+}
+
+int utps_exp(int P, int D, double *x, double *y){
+    /* computes  y = exp(x) in Taylor arithmetic
+    */
     
+    int k,d,p;
+    double *xd, *yd;
+    double *xp, *yp;
+    double tmp;
+    /* input checks */
+    if(x == y) return -1;
+    
+    /* compute y_0 = log(x_0) */
+    (*y) = exp(*x);
+    
+    /* d > 0: higher order coefficients */
+    for(p = 0; p < P; ++p){
+        xp = x + p*(D-1);
+        yp = y + p*(D-1);
+        
+        for(d = 1; d < D; ++d){
+            xd = xp + 1;
+            yd = yp + d - 1;
+            tmp = 0;
+            
+            for(k = 1; k < d; ++k){
+                tmp += k*(*yd) * (*xd);
+                xd++;
+                yd--;
+            }
+            
+            tmp += d*(*y)*(*xd);
+            
+            tmp /= d;
+            *(yp + d) = tmp;
+        }
+    }
+    return 0;
 }
 
