@@ -67,7 +67,7 @@ where $V \in R^{N \times P}$. If the gradient $\nabla f(x_0)$ is desired one can
 \end{eqnarray}
 This generalizes to higher order derivatives by computing 
 \begin{eqnarray}
-\left. \frac{\dd^D}{\dd t^D} f(x + Vt) \right|_{t=0} &=& \nabla^D f(x) \{ V,\dots, V \} \;.
+\left. \frac{1}{D!}\frac{\dd^D}{\dd t^D} f(x + Vt) \right|_{t=0} &=& \nabla^D f(x) \{ V,\dots, V \} \;.
 \end{eqnarray}
 The off-diagonal elements of the derivative tensor $\nabla^D f(x)$ can be computed by a technique called \emph{exact interpolation} \cite{Griewank2008EDP}.
 
@@ -110,11 +110,11 @@ binary functions
 \centering
 \begin{tabular}{| l | l |}
 \hline 
-$\phi(v)$  & $d = 0,\dots,D$\\
+$y = \phi(x)$  & $d = 0,\dots,D$\\
 \hline \hline
-$\ln(v)$ & $ \tilde \phi_d = \frac{1}{v_0} \left[ \tilde v_d - \sum_{j=1}^{d-1} v_{d-j} \tilde \phi_j \right]$ \\
+$\ln(x)$ & $ \tilde y_d = \frac{1}{x_0} \left[ \tilde x_d - \sum_{k=1}^{d-1} x_{d-k} \tilde y_k \right]$ \\
 \hline
-$\exp(v) $ & $ \tilde \phi_d = \sum_{j=1}^d \phi_{d-j} \tilde v_j$ \\
+$\exp(x) $ & $ \tilde y_d = \sum_{k=1}^d z_{d-k} \tilde x_k$ \\
 \hline
 $ v^r$ & $ \tilde \phi_d = \frac{1}{v_0} \left[ r \sum_{j=1}^d \phi_{d-j} \tilde v_j - \sum_{j=1}^{d-1} v_{d-j} \tilde \phi_j \right]$\\
 \hline
