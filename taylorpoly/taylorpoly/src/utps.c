@@ -1,4 +1,6 @@
-int add(int P, int D, double *x, double *y, double *z ){
+#include <math.h>
+
+int utps_add(int P, int D, double *x, double *y, double *z ){
     /* 
     computes  z = add(x,y) in Taylor arithmetic
     
@@ -10,6 +12,9 @@ int add(int P, int D, double *x, double *y, double *z ){
     int d,p;
     double *zd, *xd, *yd;
     double *zp, *xp, *yp;
+    
+    /* input checks */
+    if(z == y) return -1;
     
     zd = z;
     yd = y;
@@ -35,7 +40,7 @@ int add(int P, int D, double *x, double *y, double *z ){
     return 0;
 }
 
-int sub(int P, int D, double *x, double *y, double *z ){
+int utps_sub(int P, int D, double *x, double *y, double *z ){
     /* 
     computes  z = sub(x,y) in Taylor arithmetic
     
@@ -47,6 +52,9 @@ int sub(int P, int D, double *x, double *y, double *z ){
     int d,p;
     double *zd, *xd, *yd;
     double *zp, *xp, *yp;
+    
+    /* input checks */
+    if(z == y) return -1;
     
     zd = z;
     yd = y;
@@ -74,7 +82,7 @@ int sub(int P, int D, double *x, double *y, double *z ){
 
 
 
-int mul(int P, int D, double *x, double *y, double *z ){
+int utps_mul(int P, int D, double *x, double *y, double *z ){
     /* 
     computes  z = mul(x,y) in Taylor arithmetic
     
@@ -87,6 +95,9 @@ int mul(int P, int D, double *x, double *y, double *z ){
     double *zd, *xd, *yd;
     double *zp, *xp, *yp;
     double tmp;
+    
+    /* input checks */
+    if(z == y) return -1;
 
     /* d > 0: higher order coefficients */
     for(p = 0; p < P; ++p){
@@ -132,7 +143,7 @@ int mul(int P, int D, double *x, double *y, double *z ){
 }
 
 
-int div(int P, int D, double *x, double *y, double *z ){
+int utps_div(int P, int D, double *x, double *y, double *z ){
     /* 
     computes  z = div(x,y) in Taylor arithmetic
     
@@ -181,9 +192,47 @@ int div(int P, int D, double *x, double *y, double *z ){
             /* compute 1./y_0 (x_d - \sum_{k=0}^{d-1} z_k y_{d-k}) */
             (*zd) /= (*y);
         }
-
     }
     
     return 0;
+}
+
+int utps_log(int P, int D, double *x, double *y){
+    /* computes  y = log(x) in Taylor arithmetic
+    */
+    
+    int k,d,p;
+    double *xd, *yd;
+    double *xp, *yp;
+    double tmp;
+    /* input checks */
+    if(x == y) return -1;
+    
+    /* compute y_0 = log(x_0) */
+    (*y) = log(*x);
+    
+    /* d > 0: higher order coefficients */
+    for(p = 0; p < P; ++p){
+        xp = x + p*(D-1);
+        yp = y + p*(D-1);
+        
+        for(d = 1; d < D; ++d){
+            xd = xp + d;
+            tmp = d*(*xd);
+            xd--;
+            
+            yd = yp + 1;
+            for(k = 1; k < d; ++k){
+                tmp -= k*(*xd) * (*yd);
+                xd--;
+                yd++;
+            }
+            tmp /= (d*(*x));
+            *(yp + d) = tmp;
+        }
+    }
+
+    return 0;
+    
 }
 

@@ -1,7 +1,7 @@
 from numpy.testing import *
 import numpy
 
-from taylorpoly.utps import UTPS, add, sub, mul, div
+from taylorpoly.utps import UTPS, add, sub, mul, div, log
 
 class Test_Binary_Operators(TestCase):
     
@@ -220,8 +220,30 @@ class Test_Binary_Operators(TestCase):
 
         assert_array_almost_equal(correct1, x.data[[0,1,2]])
         assert_array_almost_equal(correct2, x.data[[0,3,4]])
-        
 
+    def test_log(self):
+        x = UTPS(numpy.array([1.,2.,3.]),P = 1, D = 3)
+        y = log(x)
+                
+        correct = numpy.array([ numpy.log(x.data[0]),
+                                x.data[1]/x.data[0],
+                                (2*x.data[2]*x.data[0] - x.data[1]**2)/(2*x.data[0]**2)])
+        assert_array_almost_equal(correct, y.data)
+
+    def test_log_vectorized(self):
+        x = UTPS(numpy.array([1.,2.,3.,4.,5.]),P = 2, D = 3)
+        y = log(x)
+        
+        correct1 = numpy.array([ numpy.log(x.data[0]),
+                                x.data[1]/x.data[0],
+                                (2*x.data[2]*x.data[0] - x.data[1]**2)/(2*x.data[0]**2)])
+        
+        correct2 = numpy.array([ numpy.log(x.data[0]),
+                                x.data[3]/x.data[0],
+                                (2*x.data[4]*x.data[0] - x.data[3]**2)/(2*x.data[0]**2)])
+        
+        assert_array_almost_equal(correct1, y.data[[0,1,2]])
+        assert_array_almost_equal(correct2, y.data[[0,3,4]])
 
 if __name__ == "__main__":
     run_module_suite()

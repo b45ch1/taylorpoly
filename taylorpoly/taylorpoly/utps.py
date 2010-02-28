@@ -6,11 +6,14 @@ _utps = numpy.ctypeslib.load_library('libutps', os.path.dirname(__file__))
 
 double_ptr =  ctypes.POINTER(ctypes.c_double)
 argtypes1 = [ctypes.c_int, ctypes.c_int, double_ptr, double_ptr, double_ptr]
+argtypes2 = [ctypes.c_int, ctypes.c_int, double_ptr, double_ptr]
 
-_utps.add.argtypes = argtypes1
-_utps.sub.argtypes = argtypes1
-_utps.mul.argtypes = argtypes1
-_utps.div.argtypes = argtypes1
+_utps.utps_add.argtypes = argtypes1
+_utps.utps_sub.argtypes = argtypes1
+_utps.utps_mul.argtypes = argtypes1
+_utps.utps_div.argtypes = argtypes1
+_utps.utps_log.argtypes = argtypes2
+
 
 
 class UTPS:
@@ -59,7 +62,7 @@ def add(x,y, out = None):
     if out == None:
         out = x.__zeros_like__()
     
-    _utps.add(x.P,x.D,
+    _utps.utps_add(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
     out.data.ctypes.data_as(double_ptr))
@@ -73,7 +76,7 @@ def sub(x,y, out = None):
     if out == None:
         out = x.__zeros_like__()
     
-    _utps.sub(x.P,x.D,
+    _utps.utps_sub(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
     out.data.ctypes.data_as(double_ptr))
@@ -87,7 +90,7 @@ def mul(x,y,out = None):
     if out == None:
         out = x.__zeros_like__()
     
-    _utps.mul(x.P,x.D,
+    _utps.utps_mul(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
     out.data.ctypes.data_as(double_ptr))
@@ -101,9 +104,22 @@ def div(x,y,out = None):
     if out == None:
         out = x.__zeros_like__()
     
-    _utps.div(x.P,x.D,
+    _utps.utps_div(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
+    out.data.ctypes.data_as(double_ptr))
+    
+    return out
+    
+def log(x,out = None):
+    """
+    computes y = log(x) in Taylor arithmetic
+    """
+    if out == None:
+        out = x.__zeros_like__()
+    
+    _utps.utps_log(x.P,x.D,
+    x.data.ctypes.data_as(double_ptr),
     out.data.ctypes.data_as(double_ptr))
     
     return out
