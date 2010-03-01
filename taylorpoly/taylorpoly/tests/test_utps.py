@@ -390,6 +390,23 @@ class Test_UTPS_methods(TestCase):
         
         assert_array_almost_equal(-1.*x.data, y.data)
         
+    def test_comparisons(self):
+        x = UTPS(numpy.array([-1.,2.,3.]), P = 1, D = 3)
+        y = UTPS(numpy.array([-2.,2.,3.]), P = 1, D = 3)
+        z = UTPS(numpy.array([-1.,2.,3.]), P = 1, D = 3)
+        
+        assert_equal(False, x < y)
+        assert_equal(True,  x > y)
+        
+        assert_equal(False, x <= y)
+        assert_equal(True,  x >= y)
+        
+        assert_equal(False, x < z)
+        assert_equal(False, x > z)
+        
+        assert_equal(True, x <= z)
+        assert_equal(True, x >= z)
+        
         
 
 if __name__ == "__main__":

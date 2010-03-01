@@ -90,6 +90,18 @@ class UTPS:
             return self.__class__( -1.* self.data, self.P, self.D)
         else:
             return self.copy()
+            
+    def __le__(self, other):
+        return self.data[0] <= other.data[0]
+        
+    def __ge__(self, other):
+        return self.data[0] >= other.data[0]
+        
+    def __lt__(self, other):
+        return self.data[0] < other.data[0]
+        
+    def __gt__(self, other):
+        return self.data[0] > other.data[0]
         
 
 def add(x,y, out = None):
