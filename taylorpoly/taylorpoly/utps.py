@@ -34,7 +34,6 @@ class UTPS:
     i.e. x.size = (D-1)*P+1
     
     """
-
     
     def __init__(self, data, P, D):
         """
@@ -58,7 +57,34 @@ class UTPS:
 
     def __zeros_like__(self):
         return self.__class__(numpy.zeros_like(self.data), self.P, self.D)
-    
+        
+    def copy(self):
+        return self.__class__(self.data.copy(), self.P, self.D)
+        
+    def __add__(self, other):
+        return add(self,other)
+        
+    def __sub__(self, other):
+        return sub(self,other)
+        
+    def __mul__(self, other):
+        return mul(self,other)
+        
+    def __div__(self, other):
+        return div(self,other)
+
+    def __iadd__(self, other):
+        return add(self,other, out = self)
+        
+    def __isub__(self, other):
+        return sub(self,other, out = self)
+        
+    def __imul__(self, other):
+        return mul(self,other, out = self)
+        
+    def __idiv__(self, other):
+        return div(self,other, out = self)
+        
 
 def add(x,y, out = None):
     """

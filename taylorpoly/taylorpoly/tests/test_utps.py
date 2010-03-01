@@ -3,7 +3,7 @@ import numpy
 
 from taylorpoly.utps import UTPS, add, sub, mul, div, log, exp, pow, sin_cos, sin, cos
 
-class Test_Binary_Operators(TestCase):
+class Test_global_funcs(TestCase):
     
     def test_add(self):
         """ test z = x + y"""
@@ -316,13 +316,73 @@ class Test_Binary_Operators(TestCase):
         correct_s = numpy.array( [numpy.sin(1),  2*numpy.cos(1), -2*numpy.sin(1) + 3*numpy.cos(1)])
         assert_array_almost_equal(correct_s, s.data)
 
-
     def test_cos(self):
         x = UTPS(numpy.array([1.,2.,3.,]),P = 1, D = 3)
         c = cos(x)
         
         correct_c = numpy.array( [numpy.cos(1), - 2*numpy.sin(1),  -3*numpy.sin(1)  - 2*numpy.cos(1)])
         assert_array_almost_equal(correct_c, c.data)
+
+class Test_UTPS_methods(TestCase):
+    def test_add(self):
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        
+        z = x + y
+        assert_array_almost_equal(add(x,y).data,z.data)
+        
+    def test_sub(self):
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        
+        z = x - y
+        assert_array_almost_equal(sub(x,y).data,z.data)
+        
+    def test_mul(self):
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        
+        z = x * y
+        assert_array_almost_equal(mul(x,y).data,z.data)
+        
+    def test_div(self):
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        
+        z = x / y
+        assert_array_almost_equal(div(x,y).data,z.data)
+        
+    def test_iadd(self):
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
+        x2 = x.copy()
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        
+        x += y
+        assert_array_almost_equal(add(x2,y,x2).data,x.data)
+        
+    def test_isub(self):
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
+        x2 = x.copy()
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        
+        x -= y
+        assert_array_almost_equal(sub(x2,y,x2).data,x.data)
+        
+    def test_imul(self):
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
+        x2 = x.copy()
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        
+        x *= y
+        assert_array_almost_equal(mul(x2,y,x2).data,x.data)
+        
+    def test_idiv(self):
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
+        x2 = x.copy()
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        
+        x /= y
+        assert_array_almost_equal(div(x2,y,x2).data,x.data)
         
 
 if __name__ == "__main__":
