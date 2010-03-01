@@ -7,6 +7,8 @@ _utps = numpy.ctypeslib.load_library('libutps', os.path.dirname(__file__))
 double_ptr =  ctypes.POINTER(ctypes.c_double)
 argtypes1 = [ctypes.c_int, ctypes.c_int, double_ptr, double_ptr, double_ptr]
 argtypes2 = [ctypes.c_int, ctypes.c_int, double_ptr, double_ptr]
+argtypes3 = [ctypes.c_int, ctypes.c_int, double_ptr, ctypes.c_double, double_ptr]
+
 
 _utps.utps_add.argtypes = argtypes1
 _utps.utps_sub.argtypes = argtypes1
@@ -14,6 +16,8 @@ _utps.utps_mul.argtypes = argtypes1
 _utps.utps_div.argtypes = argtypes1
 _utps.utps_log.argtypes = argtypes2
 _utps.utps_exp.argtypes = argtypes2
+_utps.utps_pow.argtypes = argtypes3
+
 
 
 class UTPS:
@@ -133,6 +137,20 @@ def exp(x,out = None):
     
     _utps.utps_exp(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
+    out.data.ctypes.data_as(double_ptr))
+    
+    return out
+    
+def pow(x,r, out = None):
+    """
+    computes y = pow(x,r) in Taylor arithmetic
+    """
+    if out == None:
+        out = x.__zeros_like__()
+    
+    _utps.utps_pow(x.P,x.D,
+    x.data.ctypes.data_as(double_ptr),
+    r,
     out.data.ctypes.data_as(double_ptr))
     
     return out

@@ -273,3 +273,52 @@ int utps_exp(int P, int D, double *x, double *y){
     return 0;
 }
 
+int utps_pow(int P, int D, double *x, double r, double *y){
+    /* computes  y = pow(x,r) in Taylor arithmetic
+    */
+    
+    int k,d,p;
+    double *xd, *yd;
+    double *xp, *yp;
+    double tmp;
+    /* input checks */
+    if(x == y) return -1;
+    
+    /* compute y_0 = log(x_0) */
+    (*y) = pow(*x, r);
+    
+    /* d > 0: higher order coefficients */
+    for(p = 0; p < P; ++p){
+        xp = x + p*(D-1);
+        yp = y + p*(D-1);
+        
+        for(d = 1; d < D; ++d){
+            xd = xp + 1;
+            yd = yp + d - 1;
+            tmp = 0;
+            
+            /* compute r \sum_{k=1}^d y_{d-k} k x_k */
+            for(k = 1; k < d; ++k){
+                tmp += k*(*yd) * (*xd);
+                xd++;
+                yd--;
+            }
+            tmp += d*(*y)*(*xd);
+            tmp *= r;
+            
+            /* compute \sum_{k=1}^{d-1} k* x_{d-k} y_{k} */
+            xd = xp + d - 1;
+            yd = yp + 1;
+            for(k = 1; k < d; ++k){
+                tmp -= k * (*xd) * (*yd);
+                xd--;
+                yd++;
+            }
+            
+            tmp /= ( (*x) * d);
+            *(yp + d) = tmp;
+        }
+    }
+    return 0;
+}
+

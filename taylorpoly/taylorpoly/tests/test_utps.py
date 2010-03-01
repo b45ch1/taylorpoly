@@ -1,7 +1,7 @@
 from numpy.testing import *
 import numpy
 
-from taylorpoly.utps import UTPS, add, sub, mul, div, log, exp
+from taylorpoly.utps import UTPS, add, sub, mul, div, log, exp, pow
 
 class Test_Binary_Operators(TestCase):
     
@@ -266,6 +266,23 @@ class Test_Binary_Operators(TestCase):
         assert_array_almost_equal(y1.data, y.data[[0,1,2]])
         assert_array_almost_equal(y2.data, y.data[[0,3,4]])
         
+    def test_pow(self):
+        x = UTPS(numpy.array([2.,2.,3.,7.]),P = 1, D = 4)
+        y = pow(x,2.)
+        
+        y2 = mul(x,x);
+        assert_array_almost_equal(y2.data, y.data)
+        
+    def test_pow(self):
+        x = UTPS(numpy.array([2.,2.,3.,7., 1., 3., 2.]),P = 2, D = 4)
+        x1 = UTPS(numpy.array([2.,2.,3.,7.]),P = 1, D = 4)
+        x2 = UTPS(numpy.array([2.,1., 3., 2.]),P = 1, D = 4)
+        y = pow(x,2.)
+        y1 = mul(x1,x1)
+        y2 = mul(x2,x2);
+        
+        assert_array_almost_equal(y1.data, y.data[[0,1,2,3]])
+        assert_array_almost_equal(y2.data, y.data[[0,4,5,6]])
         
 
 if __name__ == "__main__":
