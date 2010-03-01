@@ -45,7 +45,7 @@ class UTPS:
             err_str = ' (D-1)*P+1 = (%d-1)*%d+1 = %d'%(D,P,(D-1)*P+1)
             raise ValueError(err_str)
         
-        self.data = numpy.asarray(data)
+        self.data = numpy.ascontiguousarray(data)
         self.D = D
         self.P = P
         
