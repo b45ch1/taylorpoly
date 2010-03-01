@@ -17,6 +17,7 @@ _utps.utps_div.argtypes = argtypes1
 _utps.utps_log.argtypes = argtypes2
 _utps.utps_exp.argtypes = argtypes2
 _utps.utps_pow.argtypes = argtypes3
+_utps.utps_sin_cos.argtypes = argtypes2
 
 
 
@@ -154,3 +155,63 @@ def pow(x,r, out = None):
     out.data.ctypes.data_as(double_ptr))
     
     return out
+    
+def sin_cos(x, out = None):
+    """
+    computes s = sin(x) in Taylor arithmetic
+    """
+    
+    if out == None:
+        s = x.__zeros_like__()
+        c = x.__zeros_like__()
+    
+    else:
+        s,c = out
+    
+    
+    _utps.utps_sin_cos(x.P,x.D,
+    x.data.ctypes.data_as(double_ptr),
+    s.data.ctypes.data_as(double_ptr),
+    c.data.ctypes.data_as(double_ptr))
+    
+    return s,c
+    
+def sin(x, out = None):
+    """
+    computes s = sin(x) in Taylor arithmetic
+    
+    Remark: If you also need to compute cos(x) then use the function sin_cos.
+    """
+    
+    if out == None:
+        s = x.__zeros_like__()
+        
+    c = x.__zeros_like__()
+    _utps.utps_sin_cos(x.P,x.D,
+    x.data.ctypes.data_as(double_ptr),
+    s.data.ctypes.data_as(double_ptr),
+    c.data.ctypes.data_as(double_ptr))
+    
+    return s
+    
+    
+def cos(x, out = None):
+    """
+    computes s = cos(x) in Taylor arithmetic
+    
+    Remark: If you also need to compute sin(x) then use the function sin_cos.
+    """
+    
+    if out == None:
+        c = x.__zeros_like__()
+        
+    s = x.__zeros_like__()
+    
+    _utps.utps_sin_cos(x.P,x.D,
+    x.data.ctypes.data_as(double_ptr),
+    s.data.ctypes.data_as(double_ptr),
+    c.data.ctypes.data_as(double_ptr))
+    
+    return c
+        
+

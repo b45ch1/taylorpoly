@@ -1,7 +1,7 @@
 from numpy.testing import *
 import numpy
 
-from taylorpoly.utps import UTPS, add, sub, mul, div, log, exp, pow
+from taylorpoly.utps import UTPS, add, sub, mul, div, log, exp, pow, sin_cos, sin, cos
 
 class Test_Binary_Operators(TestCase):
     
@@ -283,6 +283,46 @@ class Test_Binary_Operators(TestCase):
         
         assert_array_almost_equal(y1.data, y.data[[0,1,2,3]])
         assert_array_almost_equal(y2.data, y.data[[0,4,5,6]])
+        
+    def test_sin_cos(self):
+        x = UTPS(numpy.array([1.,2.,3.,]),P = 1, D = 3)
+        s,c = sin_cos(x)
+        
+        correct_s = numpy.array( [numpy.sin(1),  2*numpy.cos(1), -2*numpy.sin(1) + 3*numpy.cos(1)])
+        correct_c = numpy.array( [numpy.cos(1), - 2*numpy.sin(1),  -3*numpy.sin(1)  - 2*numpy.cos(1)])
+
+        assert_array_almost_equal(correct_s, s.data)
+        assert_array_almost_equal(correct_c, c.data)
+        
+    def test_sin_cos_vectorized(self):
+        x = UTPS(numpy.array([1.,2.,3.,4.,5.]),P = 2, D = 3)
+        s,c = sin_cos(x)
+        
+        correct_s1 = numpy.array( [numpy.sin(1),  2*numpy.cos(1), -2*numpy.sin(1) + 3*numpy.cos(1)])
+        correct_c1 = numpy.array( [numpy.cos(1), - 2*numpy.sin(1),  -3*numpy.sin(1)  - 2*numpy.cos(1)])
+        
+        correct_s2 = numpy.array([numpy.sin(1),4*numpy.cos(1), -8*numpy.sin(1) + 5*numpy.cos(1)])
+        correct_c2 = numpy.array([numpy.cos(1),-4*numpy.sin(1), -8*numpy.cos(1) - 5*numpy.sin(1) ])
+
+        assert_array_almost_equal(correct_s1, s.data[[0,1,2]])
+        assert_array_almost_equal(correct_c1, c.data[[0,1,2]])
+        assert_array_almost_equal(correct_s2, s.data[[0,3,4]])
+        assert_array_almost_equal(correct_c2, c.data[[0,3,4]])
+        
+    def test_sin(self):
+        x = UTPS(numpy.array([1.,2.,3.,]),P = 1, D = 3)
+        s = sin(x)
+        
+        correct_s = numpy.array( [numpy.sin(1),  2*numpy.cos(1), -2*numpy.sin(1) + 3*numpy.cos(1)])
+        assert_array_almost_equal(correct_s, s.data)
+
+
+    def test_cos(self):
+        x = UTPS(numpy.array([1.,2.,3.,]),P = 1, D = 3)
+        c = cos(x)
+        
+        correct_c = numpy.array( [numpy.cos(1), - 2*numpy.sin(1),  -3*numpy.sin(1)  - 2*numpy.cos(1)])
+        assert_array_almost_equal(correct_c, c.data)
         
 
 if __name__ == "__main__":

@@ -80,8 +80,6 @@ int utps_sub(int P, int D, double *x, double *y, double *z ){
     return 0;
 }
 
-
-
 int utps_mul(int P, int D, double *x, double *y, double *z ){
     /* 
     computes  z = mul(x,y) in Taylor arithmetic
@@ -141,7 +139,6 @@ int utps_mul(int P, int D, double *x, double *y, double *z ){
     
     return 0;
 }
-
 
 int utps_div(int P, int D, double *x, double *y, double *z ){
     /* 
@@ -317,6 +314,54 @@ int utps_pow(int P, int D, double *x, double r, double *y){
             
             tmp /= ( (*x) * d);
             *(yp + d) = tmp;
+        }
+    }
+    return 0;
+}
+
+int utps_sin_cos(int P, int D, double *x, double *s, double *c){
+    /* computes s = sin(x) and c = cos(x) in Taylor arithmetic
+    */
+    
+    int k,d,p;
+    double *xd, *sd, *cd;
+    double *xp, *sp, *cp;
+    double s_tmp, c_tmp;
+    /* input checks */
+    if(x == s || x == c || s == c) return -1;
+    
+    /* compute s_0 = sin(x_0) and c_0 = cos(x_0) */
+    (*s) = sin(*x);
+    (*c) = cos(*x);
+    
+    /* d > 0: higher order coefficients */
+    for(p = 0; p < P; ++p){
+        xp = x + p*(D-1);
+        sp = s + p*(D-1);
+        cp = c + p*(D-1);
+        
+        for(d = 1; d < D; ++d){
+            xd = xp + 1;
+            cd = cp + d - 1;
+            sd = sp + d - 1;
+            
+            s_tmp = c_tmp = 0;
+            
+            for(k = 1; k < d; ++k){
+                s_tmp += k * (*xd)*(*cd);
+                c_tmp -= k * (*xd)*(*sd);
+                xd++;
+                sd--;
+                cd--;
+            }
+            s_tmp += d*(*xd)*(*c);
+            c_tmp -= d*(*xd)*(*s);
+            
+            s_tmp /= d;
+            c_tmp /= d;
+            
+            *(sp + d) = s_tmp;
+            *(cp + d) = c_tmp;
         }
     }
     return 0;
