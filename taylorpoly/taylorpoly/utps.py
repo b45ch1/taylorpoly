@@ -17,7 +17,7 @@ _utps.utps_div.argtypes = argtypes1
 _utps.utps_log.argtypes = argtypes2
 _utps.utps_exp.argtypes = argtypes2
 _utps.utps_pow.argtypes = argtypes3
-_utps.utps_sin_cos.argtypes = argtypes2
+_utps.utps_sin_cos.argtypes = argtypes1
 
 
 
