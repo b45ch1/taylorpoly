@@ -24,21 +24,55 @@ _utps.utps_sin_cos.argtypes = argtypes1
 class UTPS:
     """
     UTPS = Univariate Taylor Polynomial over Scalars
-    Implements the factor ring  R[t]/<t^{D}>.
+    Implements the factor ring  R[t]/ R[t]t^{D},
+    where R[t] is the polynomial ring in the field of real numbers R.
     
-    To allow vectorized operations (i.e. propagating several directional derivatives at once),
-    the following memory layout is used:
     
-    x = [x_0, x_{1,1}, x_{1,2}, ..., x_{1,P}, ..., x_{D-1,P}]
+    Rationale:
     
-    i.e. x.size = (D-1)*P+1
+        UTPS instances are a convenient way to do Taylor arithmetic.
+        Taylor arithmetic is a fundamental tool for Algorithmic Differentiation.
+        Using the algorithms in `taylorpoly` it is possible to easily create new 
+        Algorithmic Differentiation tools.
+        
+        
+    Example:
+    
+        Compute the gradient g of the function `f(x) = sin(x)**2.3 - x` in x = 3.
+    
+        Code::
+        
+            from taylorpoly import UTPS, sin
+            
+            x = UTPS([3.,1.])
+            f = sin(x)**2.3 - x
+            g = f.data[1]
+            
+            print 'computed gradient is g=',g
+    
+    
+    
+    Internal Data Structure:
+    
+        To allow vectorized operations (i.e. propagating several directional derivatives at once),
+        the following memory layout is used:
+        
+        x = [x_0, x_{1,1}, x_{1,2}, ..., x_{1,P}, ..., x_{D-1,P}]
+        i.e. x.size = (D-1)*P+1
     
     """
     
-    def __init__(self, data, P, D):
+    def __init__(self, data, P = None, D = None):
         """
         x = [x_0, x_{1,1}, x_{1,2}, ..., x_{1,P}, ..., x_{D-1,P}]
         """
+        
+        if P == None:
+            P = 1
+        
+        if D == None:
+            D = numpy.size(data)
+        
         if numpy.size(data) != (D-1)*P+1:
             err_str = 'size(data) should be (D-1)*P+1\n'
             err_str = 'but provided size(data) = %d\n'%numpy.size(data)
