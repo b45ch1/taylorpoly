@@ -212,7 +212,6 @@ def sin_cos(x, out = None):
     else:
         s,c = out
     
-    
     _utps.utps_sin_cos(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     s.data.ctypes.data_as(double_ptr),
