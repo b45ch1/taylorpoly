@@ -384,6 +384,13 @@ class Test_UTPS_methods(TestCase):
         x /= y
         assert_array_almost_equal(div(x2,y,x2).data,x.data)
         
+    def test_abs(self):
+        x = UTPS(numpy.array([-1.,2.,3.]), P = 1, D = 3)
+        y = numpy.abs(x)
+        
+        assert_array_almost_equal(-1.*x.data, y.data)
+        
+        
 
 if __name__ == "__main__":
     run_module_suite()

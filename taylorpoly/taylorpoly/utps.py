@@ -85,6 +85,12 @@ class UTPS:
     def __idiv__(self, other):
         return div(self,other, out = self)
         
+    def __abs__(self):
+        if self.data[0] < 0:
+            return self.__class__( -1.* self.data, self.P, self.D)
+        else:
+            return self.copy()
+        
 
 def add(x,y, out = None):
     """
@@ -239,5 +245,4 @@ def cos(x, out = None):
     c.data.ctypes.data_as(double_ptr))
     
     return c
-        
 
