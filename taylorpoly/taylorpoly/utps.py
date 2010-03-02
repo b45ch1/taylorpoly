@@ -14,6 +14,7 @@ _utps.utps_add.argtypes = argtypes1
 _utps.utps_sub.argtypes = argtypes1
 _utps.utps_mul.argtypes = argtypes1
 _utps.utps_div.argtypes = argtypes1
+_utps.utps_sqrt.argtypes = argtypes2
 _utps.utps_log.argtypes = argtypes2
 _utps.utps_exp.argtypes = argtypes2
 _utps.utps_pow.argtypes = argtypes3
@@ -190,6 +191,19 @@ def div(x,y,out = None):
     _utps.utps_div(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
+    out.data.ctypes.data_as(double_ptr))
+    
+    return out
+    
+def sqrt(x,out = None):
+    """
+    computes y = sqrt(x) in Taylor arithmetic
+    """
+    if out == None:
+        out = x.__zeros_like__()
+    
+    _utps.utps_sqrt(x.P,x.D,
+    x.data.ctypes.data_as(double_ptr),
     out.data.ctypes.data_as(double_ptr))
     
     return out

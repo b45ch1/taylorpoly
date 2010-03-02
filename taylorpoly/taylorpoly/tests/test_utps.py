@@ -1,7 +1,7 @@
 from numpy.testing import *
 import numpy
 
-from taylorpoly.utps import UTPS, add, sub, mul, div, log, exp, pow, sin_cos, sin, cos
+from taylorpoly.utps import UTPS, add, sub, mul, div, log, exp, pow, sin_cos, sin, cos, sqrt
 
 
 class Test_global_funcs(TestCase):
@@ -220,6 +220,22 @@ class Test_global_funcs(TestCase):
 
         assert_array_almost_equal(correct1, x.data[[0,1,2]])
         assert_array_almost_equal(correct2, x.data[[0,3,4]])
+        
+    def test_sqrt(self):
+        x = UTPS(numpy.array([2.,5.,7.]),P = 1, D = 3)
+        y = sqrt(x)
+        z = pow(x,0.5)
+        u = y * y
+        assert_array_almost_equal(z.data, y.data)
+        assert_array_almost_equal(u.data, x.data)
+        
+    def test_sqrt_vectorized(self):
+        x = UTPS(numpy.array([2.,5.,7.,11.,13.]),P = 2, D = 3)
+        y = sqrt(x)
+        z = pow(x,0.5)
+        u = y * y
+        assert_array_almost_equal(z.data, y.data)    
+        assert_array_almost_equal(u.data, x.data)                
 
     def test_log(self):
         x = UTPS(numpy.array([1.,2.,3.]),P = 1, D = 3)
@@ -323,6 +339,8 @@ class Test_global_funcs(TestCase):
         
         correct_c = numpy.array( [numpy.cos(1), - 2*numpy.sin(1),  -3*numpy.sin(1)  - 2*numpy.cos(1)])
         assert_array_almost_equal(correct_c, c.data)
+        
+
 
 class Test_UTPS_methods(TestCase):
     def test_add(self):

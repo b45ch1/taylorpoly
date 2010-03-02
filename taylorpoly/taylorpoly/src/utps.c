@@ -194,6 +194,43 @@ int utps_div(int P, int D, double *x, double *y, double *z ){
     return 0;
 }
 
+int utps_sqrt(int P, int D, double *x, double *y){
+    /* computes  y = sqrt(x) in Taylor arithmetic
+    */
+    
+    int k,d,p;
+    double *yd, *yd2;
+    double *xp, *yp;
+    double tmp;
+    /* input checks */
+    if(x == y) return -1;
+    
+    /* compute y_0 = log(x_0) */
+    (*y) = sqrt(*x);
+    
+    /* d > 0: higher order coefficients */
+    for(p = 0; p < P; ++p){
+        xp = x + p*(D-1);
+        yp = y + p*(D-1);
+        
+        for(d = 1; d < D; ++d){
+            yd  = yp + 1;
+            yd2 = yp + d - 1;
+            tmp = *(xp+d);
+            
+            for(k = 1; k < d; ++k){
+                tmp -= (*yd) * (*yd2);
+                yd++;
+                yd2--;
+            }
+            
+            tmp /= (2*(*y));
+            *(yp + d) = tmp;
+        }
+    }
+    return 0;
+}
+
 int utps_log(int P, int D, double *x, double *y){
     /* computes  y = log(x) in Taylor arithmetic
     */
