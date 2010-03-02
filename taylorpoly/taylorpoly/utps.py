@@ -120,6 +120,15 @@ class UTPS:
     def __idiv__(self, other):
         return div(self,other, out = self)
         
+    def __pow__(self, r):
+        return pow(self,r)
+        
+    def sin(self):
+        return sin(self)
+        
+    def cos(self):
+        return cos(self)
+        
     def __abs__(self):
         if self.data[0] < 0:
             return self.__class__( -1.* self.data, self.P, self.D)

@@ -426,6 +426,27 @@ class Test_UTPS_methods(TestCase):
         assert_equal(True, x <= z)
         assert_equal(True, x >= z)
         
+    def test_pow(self):
+        x = UTPS(numpy.array([2.,5.,7.]), P = 1, D = 3)
+        y = x**2.3
+        z = pow(x,2.3)
+        
+        assert_array_almost_equal(z.data, y.data)
+
+    def test_sin(self):
+        x = UTPS(numpy.array([2.,5.,7.]), P = 1, D = 3)
+        y = numpy.sin(x)
+        z = sin(x)
+        
+        assert_array_almost_equal(z.data, y.data)
+        
+    def test_cos(self):
+        x = UTPS(numpy.array([2.,5.,7.]), P = 1, D = 3)
+        y = numpy.cos(x)
+        z = cos(x)
+        
+        assert_array_almost_equal(z.data, y.data)
+        
     def test_convenience_init(self):
         x = UTPS(numpy.array([-1.,2.,3.]), P = 1, D = 3)
         y = UTPS([-1.,2.,3.])
