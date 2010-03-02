@@ -92,13 +92,13 @@ We have used $\stackrel{D+1}{=}$ to express equality up to order $D$. In Table \
 
 \begin{table}[!h]
 \centering
-\begin{tabular}{| c | l |}
+\begin{tabular}{| c | l | l | l |}
 \hline
-$z= \phi(x,y)$  & $d = 0,\dots,D$\\
+$z= \phi(x,y)$  & $d = 0,\dots,D$ & OPS & MOVES \\
 \hline
-$x + cy$ & $z_d = x_d + c y_d$ \\
-$x \cdot y $ & $z_d = \sum_{k=0}^d x_k  y_{d-k}$ \\
-$x / y $ & $z_d = \frac{1}{y_0} \left[ x_d - \sum_{k=0}^{d-1} z_k y_{d-k} \right]$\\
+$x + cy$ & $z_d = x_d + c y_d$ & $2D$ & $3D$ \\
+$x \times y $ & $z_d = \sum_{k=0}^d x_k  y_{d-k}$ & $D^2$ & $3D$\\
+$x / y $ & $z_d = \frac{1}{y_0} \left[ x_d - \sum_{k=0}^{d-1} z_k y_{d-k} \right]$ & $D^2$ & $3D$\\
 \hline
 \end{tabular}
 
@@ -108,27 +108,29 @@ binary functions
 \end{table}
 \begin{table}[!h]
 \centering
-\begin{tabular}{| l | l |}
+\begin{tabular}{| l | l | l | l |}
 \hline 
-$y = \phi(x)$  & $d = 0,\dots,D$\\
+$y = \phi(x)$  & $d = 0,\dots,D$ & OPS & MOVES \\
 \hline \hline
-$\ln(x)$ & $ \tilde y_d = \frac{1}{x_0} \left[ \tilde x_d - \sum_{k=1}^{d-1} x_{d-k} \tilde y_k \right]$ \\
+$\ln(x)$ & $ \tilde y_d = \frac{1}{x_0} \left[ \tilde x_d - \sum_{k=1}^{d-1} x_{d-k} \tilde y_k \right]$ & $ D^2$ & $2D$\\
 \hline
-$\exp(x) $ & $ \tilde y_d = \sum_{k=1}^d y_{d-k} \tilde x_k$ \\
+$\exp(x) $ & $ \tilde y_d = \sum_{k=1}^d y_{d-k} \tilde x_k$  & $ D^2$ & $2D$\\
 \hline
-$ x^r$ & $ \tilde y_d = \frac{1}{x_0} \left[ r \sum_{k=1}^d y_{d-k} \tilde x_k - \sum_{k=1}^{d-1} x_{d-k} \tilde y_k \right]$\\
+$\sqrt{x}$ & $ y_d = \frac{1}{2 y_0} \left[ x_d - \sum_{k=1}^{d-1} y_k y_{d-k} \right] $ & $\frac{1}{2} D^2$ & $3D$\\
 \hline
-$\sin(v)$ & $ \tilde s_d = \sum_{j=1}^d \tilde v_j c_{d-j}$ \\
-$\cos(v)$ & $ \tilde c_d = \sum_{j=1}^d - \tilde  v_j s_{d-j} $\\
+$ x^r$ & $ \tilde y_d = \frac{1}{x_0} \left[ r \sum_{k=1}^d y_{d-k} \tilde x_k - \sum_{k=1}^{d-1} x_{d-k} \tilde y_k \right]$ & $2 D^2$ & $2D$\\
 \hline
-$\tan(v)$ & $\tilde  \phi_d = \sum_{j=1}^d w_{d-j} \tilde v_j $ \\
-& $\tilde w_d = 2 \sum_{j=1}^d \phi_{d-j} \tilde \phi_j$ \\
+$\sin(v)$ & $ \tilde s_d = \sum_{j=1}^d \tilde v_j c_{d-j}$  & $2 D^2$ & $3D$\\
+$\cos(v)$ & $ \tilde c_d = \sum_{j=1}^d - \tilde  v_j s_{d-j} $ & & \\ 
 \hline
-$\arcsin(v)$ & $ \tilde \phi_d = w_0^{-1} \left( \tilde v_d - \sum_{j=1}^{d-1} w_{d-j} \tilde \phi_j \right)$\\
-& $ \tilde w_d = - \sum_{j=1}^d v_{d-j} \tilde \phi_j $ \\
+$\tan(v)$ & $\tilde  \phi_d = \sum_{j=1}^d w_{d-j} \tilde v_j $ & & \\ 
+& $\tilde w_d = 2 \sum_{j=1}^d \phi_{d-j} \tilde \phi_j$ & & \\ 
 \hline
-$\arctan(v)$ & $ \tilde \phi_d = w_0^{-1} \left( \tilde v_d - \sum_{j=1}^{d-1} w_{d-j} \tilde \phi_j \right)$\\
-& $ \tilde w_d = 2 \sum_{j=1}^d v_{d-j} \tilde v_j $ \\
+$\arcsin(v)$ & $ \tilde \phi_d = w_0^{-1} \left( \tilde v_d - \sum_{j=1}^{d-1} w_{d-j} \tilde \phi_j \right)$& & \\ 
+& $ \tilde w_d = - \sum_{j=1}^d v_{d-j} \tilde \phi_j $ & & \\ 
+\hline
+$\arctan(v)$ & $ \tilde \phi_d = w_0^{-1} \left( \tilde v_d - \sum_{j=1}^{d-1} w_{d-j} \tilde \phi_j \right)$& & \\ 
+& $ \tilde w_d = 2 \sum_{j=1}^d v_{d-j} \tilde v_j $ & & \\ 
 \hline
 \end{tabular}
 \caption{\label{tab:taylor_arithmetic_univariate}

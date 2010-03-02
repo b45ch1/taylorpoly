@@ -80,7 +80,7 @@ class UTPS:
             err_str = ' (D-1)*P+1 = (%d-1)*%d+1 = %d'%(D,P,(D-1)*P+1)
             raise ValueError(err_str)
         
-        self.data = numpy.ascontiguousarray(data)
+        self.data = numpy.ascontiguousarray(data, dtype=float)
         self.D = D
         self.P = P
         
@@ -146,7 +146,19 @@ class UTPS:
         
     def __gt__(self, other):
         return self.data[0] > other.data[0]
-        
+
+def extract(x,p,d):
+    """
+    Extracts the d'th coefficients from a numpy.ndarray x of dtype object (UTPS)
+    and returns an numpy.ndarray of dtype=float.
+    """
+    shp = numpy.shape(x)
+    xr = numpy.ravel(x)
+    y = numpy.array([xn.data[(d>0)*(1 + p*d)] for xn in xr], dtype=float)
+    y.reshape(shp)
+    return y
+    
+
 
 def add(x,y, out = None):
     """
