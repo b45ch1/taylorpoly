@@ -56,7 +56,7 @@
 We propose to implement algorithms for truncated univariate Taylor polynomials over scalars (UTPS). This algebraic structure is of fundamental importance, e.g. for higher order algorithmic differentiation or Taylor series integrators for ODEs/DAEs. The algorithms are vectorized in the higher order coefficients.
 \end{abstract}
 \paragraph{Rationale}
-A truncated univariate Taylor polynomial (UTP) $[x]_D := \sum_{d=0}^{D-1} x_d t^d,\; x \in \R$ is an element of the polynomial factor ring $R[t]/t^D$. The variable $t$ is an external parameter, i.e. the polynomial $[x]_D$ is never evaluated for a numerical $t$. The UTPs are of high importance, e.g. for use in algorithmic differentiation (AD), high order polynomial models and Taylor series integrators of ODEs/DAEs. In the following we focus on the motivation from an AD point of view.
+A truncated univariate Taylor polynomial (UTP) $[x]_D := \sum_{d=0}^{D-1} x_d t^d,\; x \in \R$ is an element of the polynomial factor ring $R[t]/R[t] t^D$. The variable $t$ is a formal variable that satisfies $t^i t^j = t^{i+j}$. That means the polynomial $[x]_D$ is never evaluated for a numerical $t$. The UTPs are of high importance, e.g. for use in algorithmic differentiation (AD), high order polynomial models and Taylor series integrators of ODEs/DAEs. In the following we focus on the motivation from an AD point of view.
 In AD, truncated Taylor polynomials allow to compute higher order derivatives. As a simple example we differentiate the function $f: \R^N \rightarrow R, \; x \mapsto y = f(x)$ in the so-called \emph{forward mode of AD}:
 \begin{eqnarray}
 \left. \frac{\dd}{\dd t} f( x + V t) \right|_{t=0} &=& \frac{\partial f}{\partial x} V \;,
@@ -79,16 +79,14 @@ The basic data structure is an array $[x]_{D+1}$ with coefficients
 \end{eqnarray*}
 I.e. the zero'th coefficient $x_0$ is the same for all $P$ directions.
 
-To show how the algorithms have to work, we restrict to $P=1$ and look at the polynomial multiplication $z = \mul(x,y)$:
+To show how the algorithms work, we restrict ourselves to the the special case $P=1$ and look at the polynomial multiplication $z = \mul(x,y)$:
 \begin{eqnarray}
 [z]_{D+1} &\stackrel{D+1}{=}& [x]_{D+1} y_{D+1} \\
 \sum_{d=0}^D z_d t^d &\stackrel{D+1}{=}& \left( \sum_{d=0}^D x_d t^d \right) \left( \sum_{c=0}^D y_c t^c \right)   \\
 &\stackrel{D+1}{=}& \sum_{d=0}^D \sum_{k=0}^d x_k y_{d-k} t^d \\
 &\stackrel{D+1}{=}& x_0 y_0 + \sum_{d=1}^D \left( \sum_{k=1}^{d-1} x_k y_{d-k} + x_0 y_d + x_d y_0 \right)  t^d \;,
 \end{eqnarray}
-We have used $\stackrel{D+1}{=}$ to express equality up to order $D$. In Table \ref{tab:taylor_arithmetic_binary} and \ref{tab:taylor_arithmetic_univariate} a selection of important functions is collected. Typically, all algorithms in the C-header file \texttt{math.h} are implemented allowing the user to perform Taylor arithmetic of any computer program.
-
-
+We have used $\stackrel{D+1}{=}$ to express equality up to order $D$. The sums have been paritioned in a way that makes it easier to implement the algorithm in the vectorized mode. In Table \ref{tab:taylor_arithmetic_binary} and \ref{tab:taylor_arithmetic_univariate} a selection of important functions is collected. Typically, all algorithms in the C-header file \texttt{math.h} are implemented allowing the user to perform Taylor arithmetic of any computer program.
 
 \begin{table}[!h]
 \centering
@@ -137,7 +135,46 @@ $\arctan(v)$ & $ \tilde \phi_d = w_0^{-1} \left( \tilde v_d - \sum_{j=1}^{d-1} w
 We use $\tilde v_j := j v_j$. The results have been adapted from \cite{Griewank2008EDP,Neidinger2005DfC}.
 }
 \end{table}
- 
+
+\paragraph{Reverse Mode AD Algorithms}
+The strengths of AD are the high numerical accuracy (close to machine precision) and the possibility to compute gradients of functions at a cost that is a small multiple of the cost to evaluate the function itself.
+The idea is best explained at an illustrative example. It is the goal to compute the gradient $\nabla_x f(x) \in \R^N$ of the function $f(x) = \prod_{n=1}^N x_n$ which can also be written as a succession of $L$ elementary operations $\phi_l$, i.e.
+\begin{eqnarray*}
+f(x) &=&  \phi_L \circ \dots \circ \phi_1 (x) \;.
+\end{eqnarray*}
+One can now apply the chain rule to the composite function  $\phi_L \circ \dots \circ \phi_1$. Giving the numerical values the name $v$ one obtains for all $l=1,\dots,L$ the formula $v_l = \phi_l(v_{-1})$.
+Recursivley applying the chain rule yields the gradient $\bar x = \nabla_x f(x)$.
+\begin{eqnarray*}
+\dd f &=& \dd \phi_L ( v_{L-1} ) \\
+&=& \underbrace{ \left. \frac{\partial \phi_L(y)}{\partial y} \right|_{y = v_{L-1}}}_{ +=: \bar v_{L-1}}  \dd \phi_{L-1}(v_{L-2}) \\
+&=&  \underbrace{ \bar v_{L-1} \left. \frac{\partial \phi_{L-2}(y)}{\partial y} \right|_{y = v_{L-2}}}_{ +=: \bar v_{L-2}}  \dd \phi_{L-2}(v_{L-3}) \\
+&=& \dots \\
+&=&  \underbrace{ \bar v_{1} \left. \frac{\partial \phi_{1}(y)}{\partial y} \right|_{y = x}}_{ +=: \bar x}  \dd x 
+\end{eqnarray*}
+The nonstandard notation $ y +=: x$ means the following: if $\bar v_l$ has not been defined yet then do $y = x$. Otherwise, use the augmented assignment $y += x$.
+Note that in the process $v_l$ for all $l=1,\dots,L$ are required. This amounts in large amount of memory that is required to differentiate large programs in the reverse mode. For all elementary functions $\phi = +,*,\sin,\exp, \dots$ the analytical expression for $\frac{\partial \phi(y)}{\partial y}$ is known. Thus, one has to provide algorithms of the form
+\begin{verbatim}
+pb_phi(x,y, ybar, xbar)
+\end{verbatim}
+where $y = \phi(x)$.
+
+To make an illustrative example we again look at the multiplication:
+\begin{eqnarray*}
+\bar z \dd \phi(x,y) &=& \bar z \frac{\partial \phi(x,y)}{\partial x} \dd x + \bar z \frac{\partial \phi(x,y)}{\partial y} \dd y \\
+&=& \underbrace{\bar z y}_{ +:= \bar x} \dd x + \underbrace{\bar z x}_{ +:= \bar y} \dd y \;.
+\end{eqnarray*}
+This also works when $x,y$ and $\bar z$ are Taylor polynomials. Thus, higher order derivatives can also be computed efficiently by a combination of Taylor arithmetic and reverse mode.
+
+
+
+
+
+
+%  One computes
+% \begin{eqnarray*}
+% \dd f(
+% \end{eqnarray*}
+
 
 % \tableofcontents
 
