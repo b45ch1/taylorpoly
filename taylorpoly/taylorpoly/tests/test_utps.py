@@ -1,7 +1,7 @@
-from numpy.testing import *
+from numpy.testing import TestCase, assert_array_almost_equal, assert_almost_equal, assert_equal
 import numpy
 
-from taylorpoly.utps import UTPS, add, sub, mul, div, log, exp, pow, sin_cos, sin, cos, sqrt
+from taylorpoly.utps import UTPS, add, sub, mul, div, log, exp, pow, sin_cos, sin, cos, sqrt, amul
 
 
 class Test_global_funcs(TestCase):
@@ -220,6 +220,21 @@ class Test_global_funcs(TestCase):
 
         assert_array_almost_equal(correct1, x.data[[0,1,2]])
         assert_array_almost_equal(correct2, x.data[[0,3,4]])
+        
+    def test_amul(self):
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        r = numpy.random.rand(3)
+        
+        z = UTPS(r, P = 1, D = 3)
+        z += mul(x, y, z)
+
+        z2 = UTPS(r, P = 1, D = 3)
+        z2 = amul(x, y, z2)
+        
+        assert_array_almost_equal(z.data,z2.data)
+        
+        
         
     def test_sqrt(self):
         x = UTPS(numpy.array([2.,5.,7.]),P = 1, D = 3)
