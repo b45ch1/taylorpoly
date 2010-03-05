@@ -26,7 +26,7 @@ class UTPS:
     """
     UTPS = Univariate Taylor Polynomial over Scalars
     Implements the factor ring  R[t]/ R[t]t^{D},
-    where R[t] is the polynomial ring in the field of real numbers R.
+    where R[t] is the polynomial ring over the field of real numbers R.
     
     
     Rationale:
