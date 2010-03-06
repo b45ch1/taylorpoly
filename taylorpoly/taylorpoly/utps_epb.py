@@ -5,8 +5,11 @@ argtypes = [ctypes.c_int, ctypes.c_int,
             double_ptr, double_ptr, double_ptr,
             double_ptr, double_ptr, double_ptr]
 
-_utps.utps_pbe_add.argtypes = argtypes
-_utps.utps_pbe_sub.argtypes = argtypes
+_utps.utps_epb_add.argtypes = argtypes
+_utps.utps_epb_sub.argtypes = argtypes
+_utps.utps_epb_mul.argtypes = argtypes
+_utps.utps_epb_div.argtypes = argtypes
+
 
 
 def epb_add(x,y,z, zbar, xbar, ybar):
@@ -14,7 +17,7 @@ def epb_add(x,y,z, zbar, xbar, ybar):
     i.e. [zbar] d[z] = [zbar] d[x] + [zbar] d[y]
     """
     
-    _utps.utps_pbe_add(x.P,x.D,
+    _utps.utps_epb_add(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
     z.data.ctypes.data_as(double_ptr),
@@ -29,7 +32,7 @@ def epb_sub(x,y,z, zbar, xbar, ybar):
     i.e. [zbar] d[z] = [zbar] d[x] - [zbar] d[y]
     """
     
-    _utps.utps_pbe_sub(x.P,x.D,
+    _utps.utps_epb_sub(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
     z.data.ctypes.data_as(double_ptr),
@@ -44,7 +47,7 @@ def epb_mul(x,y,z, zbar, xbar, ybar):
     i.e. [zbar] d[z] = [zbar] [y] d[x] + [zbar] [x] d[y]
     """
     
-    _utps.utps_pbe_mul(x.P,x.D,
+    _utps.utps_epb_mul(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
     z.data.ctypes.data_as(double_ptr),
@@ -54,4 +57,19 @@ def epb_mul(x,y,z, zbar, xbar, ybar):
     
     return (xbar, ybar)
     
-
+def epb_div(x,y,z, zbar, xbar, ybar):
+    """ computes the pullback of the extended linear form
+    i.e. [zbar] d[z] = [zbar] [z] d[x] + [zbar] [z] [z] d[y]
+    
+    Warning: this function changes the value of z!
+    """
+    
+    _utps.utps_epb_div(x.P,x.D,
+    x.data.ctypes.data_as(double_ptr),
+    y.data.ctypes.data_as(double_ptr),
+    z.data.ctypes.data_as(double_ptr),
+    zbar.data.ctypes.data_as(double_ptr),
+    xbar.data.ctypes.data_as(double_ptr),
+    ybar.data.ctypes.data_as(double_ptr))
+    
+    return (xbar, ybar)

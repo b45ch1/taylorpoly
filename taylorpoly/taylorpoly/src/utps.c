@@ -93,9 +93,6 @@ int utps_mul(int P, int D, double *x, double *y, double *z ){
     double *zd, *xd, *yd;
     double *zp, *xp, *yp;
     double tmp;
-    
-    /* input checks */
-    if(z == y) return -1;
 
     /* d > 0: higher order coefficients */
     for(p = 0; p < P; ++p){

@@ -98,6 +98,14 @@ class Test_global_funcs(TestCase):
         
         assert_array_almost_equal([5.,17.,40., 21., 36.], z.data)
         
+    def test_mul_same(self):
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
+        y = x.copy()
+        z = mul(x,y)
+        x = mul(x,x,x)
+        
+        assert_array_almost_equal(z.data, x.data)
+        
     def test_imul_vectorized(self):
         x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2, D = 3)
         y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2, D = 3)
@@ -249,8 +257,8 @@ class Test_global_funcs(TestCase):
         y = sqrt(x)
         z = pow(x,0.5)
         u = y * y
-        assert_array_almost_equal(z.data, y.data)    
-        assert_array_almost_equal(u.data, x.data)                
+        assert_array_almost_equal(z.data, y.data)
+        assert_array_almost_equal(u.data, x.data)
 
     def test_log(self):
         x = UTPS(numpy.array([1.,2.,3.]),P = 1, D = 3)

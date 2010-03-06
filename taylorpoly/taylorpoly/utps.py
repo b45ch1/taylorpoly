@@ -202,9 +202,6 @@ def mul(x,y,out = None):
     """
     if out == None:
         out = x.__zeros_like__()
-        
-    if id(x) == id(y) and id(y) == id(out):
-        y = x.copy()
     
     _utps.utps_mul(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
