@@ -17,8 +17,26 @@ Example 1:
     Compute the gradient: df/dx (x,y)
 
     Code::
-
-
+    
+        import numpy
+        from taylorpoly.utps import UTPS, exp
+        
+        x,y = 2,3
+        v0 = UTPS([x,1.,0.], P = 2)
+        v1 = UTPS([y,0.,1.], P = 2)
+        
+        v2 = v0 * v1
+        v3 = exp(v2)
+        f = v3 + v0
+        
+        # finite differences gradient
+        delta = 10**-8
+        g1_fd = ((numpy.exp((x + delta) * y) + x + delta) - ((numpy.exp(x * y) + x)))/delta
+        g2_fd = ((numpy.exp((y + delta) * x) + x) - ((numpy.exp(x * y) + x)))/delta
+        
+        print 'forward mode AD gradient = [ %f, %f] '%(f.data[1], f.data[2])
+        print 'symbolic        gradient = [ %f, %f] '%(y*numpy.exp(x*y) + 1, x*numpy.exp(x*y))
+        print 'finite diff.    gradient = [ %f, %f] '%(g1_fd, g2_fd)
     
 
 
@@ -111,15 +129,19 @@ class UTPS:
         self.P = P
         
     def __str__(self):
+        """ return human readable string representation"""
         return str(self.data)
         
     def __repr__(self):
+        """ return data that allows to reconstruct the instance"""
         ret_str = 'UTPS(%s, %d, %d)'%(str(self.data), self.P)
 
     def __zeros_like__(self):
+        """ returns a copy of self with all elements set to zero"""
         return self.__class__(numpy.zeros_like(self.data), self.P)
         
     def copy(self):
+        """ copies all data in self to a new instance """
         return self.__class__(self.data.copy(), self.P)
         
     def __add__(self, other):
@@ -187,8 +209,7 @@ def extract(x,p,d):
 
 
 def add(x,y, out = None):
-    """
-    computes z = x*y in Taylor arithmetic
+    """ computes z = x+y in Taylor arithmetic
     """
     if out == None:
         out = x.__zeros_like__()
@@ -205,8 +226,7 @@ def add(x,y, out = None):
     return out
     
 def sub(x,y, out = None):
-    """
-    computes z = x*y in Taylor arithmetic
+    """ computes z = x-y in Taylor arithmetic
     """
     if out == None:
         out = x.__zeros_like__()
@@ -223,8 +243,7 @@ def sub(x,y, out = None):
     return out
 
 def mul(x,y,out = None):
-    """
-    computes z = x*y in Taylor arithmetic
+    """ computes z = x*y in Taylor arithmetic
     """
     if out == None:
         out = x.__zeros_like__()
@@ -237,8 +256,7 @@ def mul(x,y,out = None):
     return out
     
 def div(x,y,out = None):
-    """
-    computes z = x/y in Taylor arithmetic
+    """ computes z = x/y in Taylor arithmetic
     """
     if out == None:
         out = x.__zeros_like__()
@@ -256,8 +274,7 @@ def div(x,y,out = None):
     return out
     
 def amul(x,y,out = None):
-    """
-    computes z += x*y in Taylor arithmetic
+    """ computes z += x*y in Taylor arithmetic
     """
     if out == None:
         out = x.__zeros_like__()
@@ -270,8 +287,7 @@ def amul(x,y,out = None):
     return out
     
 def sqrt(x,out = None):
-    """
-    computes y = sqrt(x) in Taylor arithmetic
+    """ computes y = sqrt(x) in Taylor arithmetic
     """
     if out == None:
         out = x.__zeros_like__()
@@ -283,8 +299,7 @@ def sqrt(x,out = None):
     return out
     
 def log(x,out = None):
-    """
-    computes y = log(x) in Taylor arithmetic
+    """ computes y = log(x) in Taylor arithmetic
     """
     if out == None:
         out = x.__zeros_like__()
@@ -296,8 +311,7 @@ def log(x,out = None):
     return out
     
 def exp(x,out = None):
-    """
-    computes y = exp(x) in Taylor arithmetic
+    """ computes y = exp(x) in Taylor arithmetic
     """
     if out == None:
         out = x.__zeros_like__()
@@ -309,8 +323,7 @@ def exp(x,out = None):
     return out
     
 def pow(x,r, out = None):
-    """
-    computes y = pow(x,r) in Taylor arithmetic
+    """ computes y = pow(x,r) in Taylor arithmetic
     """
     if out == None:
         out = x.__zeros_like__()
@@ -323,8 +336,7 @@ def pow(x,r, out = None):
     return out
     
 def sin_cos(x, out = None):
-    """
-    computes s = sin(x) in Taylor arithmetic
+    """ computes s = sin(x) in Taylor arithmetic
     """
     
     if out == None:
@@ -342,8 +354,7 @@ def sin_cos(x, out = None):
     return s,c
     
 def sin(x, out = None):
-    """
-    computes s = sin(x) in Taylor arithmetic
+    """ computes s = sin(x) in Taylor arithmetic
     
     Remark: If you also need to compute cos(x) then use the function sin_cos.
     """
@@ -361,8 +372,7 @@ def sin(x, out = None):
     
     
 def cos(x, out = None):
-    """
-    computes s = cos(x) in Taylor arithmetic
+    """ computes s = cos(x) in Taylor arithmetic
     
     Remark: If you also need to compute sin(x) then use the function sin_cos.
     """
