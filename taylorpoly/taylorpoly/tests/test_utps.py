@@ -8,8 +8,8 @@ class Test_global_funcs(TestCase):
     
     def test_add(self):
         """ test z = x + y"""
-        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
-        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1)
         
         z = add(x,y)
         
@@ -17,24 +17,24 @@ class Test_global_funcs(TestCase):
     
     def test_iadd(self):
         """ test y += x"""
-        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
-        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1)
         
         y = add(y,x,y)
         
         assert_array_almost_equal([6.,9.,14.], y.data)
         
     def test_add_vectorized(self):
-        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2, D = 3)
-        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2, D = 3)
+        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2)
+        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2)
         
         z = add(x,y)
         
         assert_array_almost_equal([6.,9.,14., 5., 8.], z.data)
         
     def test_iadd_vectorized(self):
-        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2, D = 3)
-        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2, D = 3)
+        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2)
+        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2)
         
         y = add(y,x,y)
         
@@ -42,8 +42,8 @@ class Test_global_funcs(TestCase):
          
     def test_sub(self):
         """ test z = x - y"""
-        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
-        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1)
         
         z = sub(x,y)
         
@@ -51,55 +51,55 @@ class Test_global_funcs(TestCase):
     
     def test_isub(self):
         """ test y -= x"""
-        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
-        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1)
         
         y = sub(y,x,y)
         
         assert_array_almost_equal([4.,5.,8.], y.data)
         
     def test_sub_vectorized(self):
-        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2, D = 3)
-        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2, D = 3)
+        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2)
+        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2)
         
         z = sub(y,x)
         
         assert_array_almost_equal([4.,5.,8., -3., -4.], z.data)
         
     def test_iadd_vectorized(self):
-        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2, D = 3)
-        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2, D = 3)
+        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2)
+        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2)
         
         y = sub(y,x,y)
         
         assert_array_almost_equal([4.,5.,8., -3., -4.], y.data)
       
     def test_mul(self):
-        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
-        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1)
         
         z = mul(x,y)
         
         assert_array_almost_equal([5.,17.,40.], z.data)
         
     def test_imul(self):
-        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
-        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1)
         
         y = mul(y,x,y)
         assert_array_almost_equal([5.,17.,40.], y.data)
         
         
     def test_mul_vectorized(self):
-        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2, D = 3)
-        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2, D = 3)
+        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2)
+        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2)
         
         z = mul(x,y)
         
         assert_array_almost_equal([5.,17.,40., 21., 36.], z.data)
         
     def test_mul_same(self):
-        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1)
         y = x.copy()
         z = mul(x,y)
         x = mul(x,x,x)
@@ -107,8 +107,8 @@ class Test_global_funcs(TestCase):
         assert_array_almost_equal(z.data, x.data)
         
     def test_imul_vectorized(self):
-        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2, D = 3)
-        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2, D = 3)
+        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2)
+        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2)
         
         y = mul(y,x,y)
         
@@ -121,8 +121,8 @@ class Test_global_funcs(TestCase):
         except:
             return
         
-        x = UTPS(numpy.array([1.,4.,3.]), P = 1, D = 3)
-        y = UTPS(numpy.array([5.,1, 7.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,4.,3.]), P = 1)
+        y = UTPS(numpy.array([5.,1, 7.]), P = 1)
         
         z = div(x,y)
         assert_array_almost_equal([1.,4.,3.], x.data)
@@ -145,9 +145,9 @@ class Test_global_funcs(TestCase):
         except:
             return
         
-        x  = UTPS(numpy.array([1.,4.,3.]), P = 1, D = 3)
-        x2 = UTPS(numpy.array([1.,4.,3.]), P = 1, D = 3)
-        y = UTPS(numpy.array([5.,1, 7.]), P = 1, D = 3)
+        x  = UTPS(numpy.array([1.,4.,3.]), P = 1)
+        x2 = UTPS(numpy.array([1.,4.,3.]), P = 1)
+        y = UTPS(numpy.array([5.,1, 7.]), P = 1)
         
         x = div(x,y,x)
         assert_array_almost_equal([5.,1, 7.], y.data)
@@ -170,8 +170,8 @@ class Test_global_funcs(TestCase):
             return
         
         
-        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2, D = 3)
-        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2, D = 3)
+        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2)
+        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2)
         
         z = div(x,y)
         
@@ -204,8 +204,8 @@ class Test_global_funcs(TestCase):
         except:
             return
         
-        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2, D = 3)
-        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2, D = 3)
+        x = UTPS(numpy.array([1.,2.,3, 4.,6.]),P = 2)
+        y = UTPS(numpy.array([5.,7.,11, 1.,2.]),P = 2)
         
         t = sympy.symbols('t')
         sx1 = x.data[0] + x.data[1]*t + x.data[2]*t**2
@@ -230,14 +230,14 @@ class Test_global_funcs(TestCase):
         assert_array_almost_equal(correct2, x.data[[0,3,4]])
         
     def test_amul(self):
-        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
-        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1)
         r = numpy.random.rand(3)
         
-        z = UTPS(r, P = 1, D = 3)
+        z = UTPS(r, P = 1)
         z += mul(x, y, z)
 
-        z2 = UTPS(r, P = 1, D = 3)
+        z2 = UTPS(r, P = 1)
         z2 = amul(x, y, z2)
         
         assert_array_almost_equal(z.data,z2.data)
@@ -245,7 +245,7 @@ class Test_global_funcs(TestCase):
         
         
     def test_sqrt(self):
-        x = UTPS(numpy.array([2.,5.,7.]),P = 1, D = 3)
+        x = UTPS(numpy.array([2.,5.,7.]),P = 1)
         y = sqrt(x)
         z = pow(x,0.5)
         u = y * y
@@ -253,7 +253,7 @@ class Test_global_funcs(TestCase):
         assert_array_almost_equal(u.data, x.data)
         
     def test_sqrt_vectorized(self):
-        x = UTPS(numpy.array([2.,5.,7.,11.,13.]),P = 2, D = 3)
+        x = UTPS(numpy.array([2.,5.,7.,11.,13.]),P = 2)
         y = sqrt(x)
         z = pow(x,0.5)
         u = y * y
@@ -261,7 +261,7 @@ class Test_global_funcs(TestCase):
         assert_array_almost_equal(u.data, x.data)
 
     def test_log(self):
-        x = UTPS(numpy.array([1.,2.,3.]),P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]),P = 1)
         y = log(x)
                 
         correct = numpy.array([ numpy.log(x.data[0]),
@@ -270,7 +270,7 @@ class Test_global_funcs(TestCase):
         assert_array_almost_equal(correct, y.data)
 
     def test_log_vectorized(self):
-        x = UTPS(numpy.array([1.,2.,3.,4.,5.]),P = 2, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.,4.,5.]),P = 2)
         y = log(x)
         
         correct1 = numpy.array([ numpy.log(x.data[0]),
@@ -285,7 +285,7 @@ class Test_global_funcs(TestCase):
         assert_array_almost_equal(correct2, y.data[[0,3,4]])
 
     def test_exp(self):
-        x = UTPS(numpy.array([1.,2.,3.]),P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]),P = 1)
         y = exp(x)
                 
         correct = numpy.array([ numpy.exp(x.data[0]),
@@ -295,9 +295,9 @@ class Test_global_funcs(TestCase):
         assert_array_almost_equal(correct, y.data)
         
     def test_exp_vectorized(self):
-        x = UTPS(numpy.array([1.,2.,3.,4.,5.]),P = 2, D = 3)
-        x1 = UTPS(numpy.array([1.,2.,3.]),P = 1, D = 3)
-        x2 = UTPS(numpy.array([1.,4.,5.]),P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.,4.,5.]),P = 2)
+        x1 = UTPS(numpy.array([1.,2.,3.]),P = 1)
+        x2 = UTPS(numpy.array([1.,4.,5.]),P = 1)
         
         y  = exp(x)
         y1 = exp(x1)
@@ -307,16 +307,16 @@ class Test_global_funcs(TestCase):
         assert_array_almost_equal(y2.data, y.data[[0,3,4]])
         
     def test_pow(self):
-        x = UTPS(numpy.array([2.,2.,3.,7.]),P = 1, D = 4)
+        x = UTPS(numpy.array([2.,2.,3.,7.]),P = 1)
         y = pow(x,2.)
         
         y2 = mul(x,x);
         assert_array_almost_equal(y2.data, y.data)
         
     def test_pow(self):
-        x = UTPS(numpy.array([2.,2.,3.,7., 1., 3., 2.]),P = 2, D = 4)
-        x1 = UTPS(numpy.array([2.,2.,3.,7.]),P = 1, D = 4)
-        x2 = UTPS(numpy.array([2.,1., 3., 2.]),P = 1, D = 4)
+        x = UTPS(numpy.array([2.,2.,3.,7., 1., 3., 2.]),P = 2)
+        x1 = UTPS(numpy.array([2.,2.,3.,7.]),P = 1)
+        x2 = UTPS(numpy.array([2.,1., 3., 2.]),P = 1)
         y = pow(x,2.)
         y1 = mul(x1,x1)
         y2 = mul(x2,x2);
@@ -325,7 +325,7 @@ class Test_global_funcs(TestCase):
         assert_array_almost_equal(y2.data, y.data[[0,4,5,6]])
         
     def test_sin_cos(self):
-        x = UTPS(numpy.array([1.,2.,3.,]),P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.,]),P = 1)
         s,c = sin_cos(x)
         
         correct_s = numpy.array( [numpy.sin(1),  2*numpy.cos(1), -2*numpy.sin(1) + 3*numpy.cos(1)])
@@ -335,7 +335,7 @@ class Test_global_funcs(TestCase):
         assert_array_almost_equal(correct_c, c.data)
         
     def test_sin_cos_vectorized(self):
-        x = UTPS(numpy.array([1.,2.,3.,4.,5.]),P = 2, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.,4.,5.]),P = 2)
         s,c = sin_cos(x)
         
         correct_s1 = numpy.array( [numpy.sin(1),  2*numpy.cos(1), -2*numpy.sin(1) + 3*numpy.cos(1)])
@@ -350,14 +350,14 @@ class Test_global_funcs(TestCase):
         assert_array_almost_equal(correct_c2, c.data[[0,3,4]])
         
     def test_sin(self):
-        x = UTPS(numpy.array([1.,2.,3.,]),P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.,]),P = 1)
         s = sin(x)
         
         correct_s = numpy.array( [numpy.sin(1),  2*numpy.cos(1), -2*numpy.sin(1) + 3*numpy.cos(1)])
         assert_array_almost_equal(correct_s, s.data)
 
     def test_cos(self):
-        x = UTPS(numpy.array([1.,2.,3.,]),P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.,]),P = 1)
         c = cos(x)
         
         correct_c = numpy.array( [numpy.cos(1), - 2*numpy.sin(1),  -3*numpy.sin(1)  - 2*numpy.cos(1)])
@@ -367,75 +367,75 @@ class Test_global_funcs(TestCase):
 
 class Test_UTPS_methods(TestCase):
     def test_add(self):
-        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
-        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1)
         
         z = x + y
         assert_array_almost_equal(add(x,y).data,z.data)
         
     def test_sub(self):
-        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
-        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1)
         
         z = x - y
         assert_array_almost_equal(sub(x,y).data,z.data)
         
     def test_mul(self):
-        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
-        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1)
         
         z = x * y
         assert_array_almost_equal(mul(x,y).data,z.data)
         
     def test_div(self):
-        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
-        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1)
         
         z = x / y
         assert_array_almost_equal(div(x,y).data,z.data)
         
     def test_iadd(self):
-        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1)
         x2 = x.copy()
-        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1)
         
         x += y
         assert_array_almost_equal(add(x2,y,x2).data,x.data)
         
     def test_isub(self):
-        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1)
         x2 = x.copy()
-        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1)
         
         x -= y
         assert_array_almost_equal(sub(x2,y,x2).data,x.data)
         
     def test_imul(self):
-        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1)
         x2 = x.copy()
-        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1)
         
         x *= y
         assert_array_almost_equal(mul(x2,y,x2).data,x.data)
         
     def test_idiv(self):
-        x = UTPS(numpy.array([1.,2.,3.]), P = 1, D = 3)
+        x = UTPS(numpy.array([1.,2.,3.]), P = 1)
         x2 = x.copy()
-        y = UTPS(numpy.array([5.,7.,11.]), P = 1, D = 3)
+        y = UTPS(numpy.array([5.,7.,11.]), P = 1)
         
         x /= y
         assert_array_almost_equal(div(x2,y,x2).data,x.data)
         
     def test_abs(self):
-        x = UTPS(numpy.array([-1.,2.,3.]), P = 1, D = 3)
+        x = UTPS(numpy.array([-1.,2.,3.]), P = 1)
         y = numpy.abs(x)
         
         assert_array_almost_equal(-1.*x.data, y.data)
         
     def test_comparisons(self):
-        x = UTPS(numpy.array([-1.,2.,3.]), P = 1, D = 3)
-        y = UTPS(numpy.array([-2.,2.,3.]), P = 1, D = 3)
-        z = UTPS(numpy.array([-1.,2.,3.]), P = 1, D = 3)
+        x = UTPS(numpy.array([-1.,2.,3.]), P = 1)
+        y = UTPS(numpy.array([-2.,2.,3.]), P = 1)
+        z = UTPS(numpy.array([-1.,2.,3.]), P = 1)
         
         assert_equal(False, x < y)
         assert_equal(True,  x > y)
@@ -450,28 +450,28 @@ class Test_UTPS_methods(TestCase):
         assert_equal(True, x >= z)
         
     def test_pow(self):
-        x = UTPS(numpy.array([2.,5.,7.]), P = 1, D = 3)
+        x = UTPS(numpy.array([2.,5.,7.]), P = 1)
         y = x**2.3
         z = pow(x,2.3)
         
         assert_array_almost_equal(z.data, y.data)
 
     def test_sin(self):
-        x = UTPS(numpy.array([2.,5.,7.]), P = 1, D = 3)
+        x = UTPS(numpy.array([2.,5.,7.]), P = 1)
         y = numpy.sin(x)
         z = sin(x)
         
         assert_array_almost_equal(z.data, y.data)
         
     def test_cos(self):
-        x = UTPS(numpy.array([2.,5.,7.]), P = 1, D = 3)
+        x = UTPS(numpy.array([2.,5.,7.]), P = 1)
         y = numpy.cos(x)
         z = cos(x)
         
         assert_array_almost_equal(z.data, y.data)
         
     def test_convenience_init(self):
-        x = UTPS(numpy.array([-1.,2.,3.]), P = 1, D = 3)
+        x = UTPS(numpy.array([-1.,2.,3.]), P = 1)
         y = UTPS([-1.,2.,3.])
         
         assert_almost_equal(x.data, y.data)

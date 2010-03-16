@@ -1,3 +1,30 @@
+"""
+This module provides algorithms for Univariate Taylor Propagation over Scalars (UTPS)
+in the forward and reverse mode of Algorithmic Differentiation (AD).
+
+More specifically, algorithms are provided that take Univariate Taylor Polynomials
+over Scalars ( also abbreviated UTPS) as inputs and have UTPS instances as output.
+
+For convenience, a class UTPS is provided that wraps the data structure of the
+univariate Taylor polynomials over scalars.
+
+The algorithms take objects of the class UTPS as input. The class UTPS is a simple
+wrapper of the data structure.
+
+
+Example 1:
+
+    Compute the gradient: df/dx (x,y)
+
+    Code::
+
+
+    
+
+
+"""
+
+
 import os
 import ctypes
 import numpy
@@ -63,7 +90,7 @@ class UTPS:
     
     """
     
-    def __init__(self, data, P = None, D = None):
+    def __init__(self, data, P = None):
         """
         x = [x_0, x_{1,1}, x_{1,2}, ..., x_{1,P}, ..., x_{D-1,P}]
         """
@@ -71,13 +98,12 @@ class UTPS:
         if P == None:
             P = 1
         
-        if D == None:
-            D = numpy.size(data)
+        D = (numpy.size(data)-1)//P + 1
         
-        if numpy.size(data) != (D-1)*P+1:
-            err_str = 'size(data) should be (D-1)*P+1\n'
-            err_str = 'but provided size(data) = %d\n'%numpy.size(data)
-            err_str = ' (D-1)*P+1 = (%d-1)*%d+1 = %d'%(D,P,(D-1)*P+1)
+        if (numpy.size(data)-1) % P != 0:
+            err_str  = 'size of input data does not match the value of P\n'
+            err_str += 'inputs have to satisfy data.size = (D-1)*P+1\n'
+            err_str += 'but provided data.size = %d and P = %d\n'%(numpy.size(data), P)
             raise ValueError(err_str)
         
         self.data = numpy.ascontiguousarray(data, dtype=float)
@@ -88,13 +114,13 @@ class UTPS:
         return str(self.data)
         
     def __repr__(self):
-        ret_str = 'UTPS(%s, %d, %d)'%(str(self.data), self.P, self.D)
+        ret_str = 'UTPS(%s, %d, %d)'%(str(self.data), self.P)
 
     def __zeros_like__(self):
-        return self.__class__(numpy.zeros_like(self.data), self.P, self.D)
+        return self.__class__(numpy.zeros_like(self.data), self.P)
         
     def copy(self):
-        return self.__class__(self.data.copy(), self.P, self.D)
+        return self.__class__(self.data.copy(), self.P)
         
     def __add__(self, other):
         return add(self,other)
@@ -131,7 +157,7 @@ class UTPS:
         
     def __abs__(self):
         if self.data[0] < 0:
-            return self.__class__( -1.* self.data, self.P, self.D)
+            return self.__class__( -1.* self.data, self.P)
         else:
             return self.copy()
             
