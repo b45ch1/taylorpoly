@@ -363,6 +363,7 @@ def sin(x, out = None):
         s = x.__zeros_like__()
         
     c = x.__zeros_like__()
+    
     _utps.utps_sin_cos(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     s.data.ctypes.data_as(double_ptr),
