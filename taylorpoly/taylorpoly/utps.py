@@ -70,8 +70,8 @@ _utps.utps_sin_cos.argtypes = argtypes1
 class UTPS:
     """
     UTPS = Univariate Taylor Polynomial over Scalars
-    Implements the factor ring  R[t]/ R[t]t^{D},
-    where R[t] is the polynomial ring over the field of real numbers R.
+    Implements the factor ring  R[[t]]/ R[[t]]t^{D},
+    where R[[t]] is the formal power series over the field of real numbers R.
     
     
     Rationale:
@@ -108,13 +108,10 @@ class UTPS:
     
     """
     
-    def __init__(self, data, P = None):
+    def __init__(self, data, P = 1):
         """
         x = [x_0, x_{1,1}, x_{1,2}, ..., x_{1,P}, ..., x_{D-1,P}]
         """
-        
-        if P == None:
-            P = 1
         
         D = (numpy.size(data)-1)//P + 1
         
