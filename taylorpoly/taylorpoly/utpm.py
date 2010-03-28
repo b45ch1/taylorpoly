@@ -21,13 +21,11 @@ import numpy
 _utpm = numpy.ctypeslib.load_library('libutpm.so', os.path.dirname(__file__))
 
 c_double_ptr = ctypes.POINTER(ctypes.c_double)
-c_int_ptr = ctypes.POINTER(ctypes.c_int)
+c_int_ptr    = ctypes.POINTER(ctypes.c_int)
 c_int        = ctypes.c_int
-# argtypes1 = [ctypes.c_int, ctypes.c_int, double_ptr, double_ptr, double_ptr]
-# argtypes2 = [ctypes.c_int, ctypes.c_int, double_ptr, double_ptr]
-# argtypes3 = [ctypes.c_int, ctypes.c_int, double_ptr, ctypes.c_double, double_ptr]
+c_double     = ctypes.c_double
 
-
+_utpm.utpm_daxpy.argtypes = [c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int]
 _utpm.utpm_dgesv.argtypes = [c_int, c_int, c_int, c_int, c_int, c_double_ptr, c_int, c_int_ptr, c_double_ptr, c_int]
 
 class UTPM:
@@ -79,7 +77,33 @@ class UTPM:
     def copy(self):
         """ copies all data in self to a new instance """
         return self.__class__(self.data.copy(), shape = self._shape, P = self.P)
+        
+    def __zeros_like__(self):
+        """ returns a copy of self with all elements set to zero"""
+        return self.__class__(numpy.zeros_like(self.data), shape = self._shape, P = self.P)
 
+
+def add(x,y, out = None):
+    """ computes z = x+y in Taylor arithmetic
+    
+    if out = y, then  y = x + y is computed.
+    """
+    if out == None:
+        out = y.copy()
+        
+    if id(x) == id(y) and id(y) == id(out):
+        out.data *= 2
+        return out
+    
+    P,D,N = x.P, x.D, x._shape[0]
+    
+    # int P, int D, const int N, const double alpha, const double *x,
+    #              const int incx, double *y, const int incy
+    _utpm.utpm_daxpy(P, D, N, 1., x.data.ctypes.data_as(c_double_ptr), 1,
+    out.data.ctypes.data_as(c_double_ptr), 1)
+    
+    return out
+    
 
 def solve(A,B):
     """
