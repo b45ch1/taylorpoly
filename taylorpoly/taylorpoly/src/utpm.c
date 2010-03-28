@@ -6,14 +6,26 @@ int utpm_dgesv(int P, int D, const enum CBLAS_ORDER Order,
                   double *B, const int ldb){
     /*
     Solves the linear system A X = B in Taylor arithmetic.
-    See the documentation of http://www.netlib.org/lapack/double/dgesv.f for details.
+    See the documentation of http://www.netlib.org/lapack/double/dgesv.f 
+    and http://www.netlib.org/lapack/double/dgetrs.f for details.
     The API is the modification of the clapack.h API.
     */
     
+    int d,p;
+    double *Ad, *Bd, *Xd;
+    double *Ap, *Bp, *Xp;
     int info;
     
     /* compute d = 0 */
     info = clapack_dgesv(Order, N, NRHS, A, lda, ipiv, B, ldb);
+    
+    /* compute higher order coefficients d > 0 */
+    // for(p=0; p < P; ++p){
+    //     for(d=1; d < D; ++d){
+    //         int clapack_dgetrs(Order, CblasNoTrans, N, NRHS, A, lda, ipiv, B, ldb);
+    //     }
+    // }
+
     
     return info;
 }
