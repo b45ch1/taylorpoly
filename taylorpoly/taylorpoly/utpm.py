@@ -103,6 +103,14 @@ def add(x,y, out = None):
     out.data.ctypes.data_as(c_double_ptr), 1)
     
     return out
+
+
+def cauchy_product(d,A,B, out = None):
+    P,D,N,K = A.P, A.D, A._shape
+    K,M = B._shape
+    
+    if out == None:
+        out = UTPM( numpy.zeros(N*M*P*(D-1)+N*M), P = P, shape = (N,M))
     
 
 def solve(A,B):
