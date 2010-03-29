@@ -60,6 +60,52 @@ class UTPM:
         self.D = D
         self.P = P
         self.data = numpy.ravel(data)
+        self.coeff = self.Coeff(self)
+        
+    class Coeff:
+        """
+        helper class for UTPM that allows to extract the array of direction p
+        and degree d from UTPM.data as numpy array with the correct shape.
+        """
+        def __init__(self, x):
+            self.x = x
+            
+        def __getitem__(self, sl):
+            p,d = sl
+            if d >= self.x.D:
+                raise ValueError('d is too large')
+            if p >= self.x.P:
+                raise ValueError('p is too large')
+                
+            if d == 0:
+                return self.x.data[:numpy.prod(self.x._shape)].reshape(self.x._shape)
+            
+            else:
+                N = numpy.prod(self.x._shape)
+                D = self.x.D
+                start = N + p * N * (D-1) + N*(d-1)
+                stop  = N + p * N * (D-1) + N*d
+                return self.x.data[start:stop].reshape(self.x._shape)
+                
+        def __setitem__(self, sl, value):
+            p,d = sl
+            if d >= self.x.D:
+                raise ValueError('d is too large')
+            if p >= self.x.P:
+                raise ValueError('p is too large')
+                
+            if d == 0:
+                self.x.data[:numpy.prod(self.x._shape)].reshape(self.x._shape).__setitem__(Ellipsis, value)
+            
+            else:
+                N = numpy.prod(self.x._shape)
+                D = self.x.D
+                start = N + p * N * (D-1) + N*(d-1)
+                stop  = N + p * N * (D-1) + N*d
+                self.x.data[start:stop].reshape(self.x._shape).__setitem__(Ellipsis, value)
+                
+                
+        
         
         
     def __str__(self):
@@ -81,24 +127,7 @@ class UTPM:
     def __zeros_like__(self):
         """ returns a copy of self with all elements set to zero"""
         return self.__class__(numpy.zeros_like(self.data), shape = self._shape, P = self.P)
-        
-    
-    def coeff(self, p, d):
-        if d >= self.D:
-            raise ValueError('d is too large')
-        if p >= self.P:
-            raise ValueError('p is too large')
-            
-        if d == 0:
-            return self.data[:numpy.prod(self._shape)].reshape(self._shape)
-        
-        else:
-            N = numpy.prod(self._shape)
-            D = self.D
-            start = N + p * N * (D-1) + N*(d-1)
-            stop  = N + p * N * (D-1) + N*d
-            return self.data[start:stop].reshape(self._shape)
-        
+          
 
 
 def add(x,y, out = None):

@@ -92,6 +92,23 @@ int utpm_dgesv(int P, int D, const enum CBLAS_ORDER Order,
     clapack_dgesv(Order, N, NRHS, A, lda, ipiv, B, ldb);
     
     /* compute higher order coefficients d > 0 */
+    
+    /*
+        # d = 0:  base point
+        for p in range(P):
+            y_data[0,p,...] = numpy.linalg.solve(A_data[0,p,...], x_data[0,p,...])
+
+        # d = 1,...,D-1
+        tmp = numpy.zeros((M,K),dtype=float)
+        for d in range(1, D):
+            for p in range(P):
+                tmp[:,:] = x_data[d,p,:,:]
+                for k in range(1,d+1):
+                    tmp[:,:] -= numpy.dot(A_data[k,p,:,:],y_data[d-k,p,:,:])
+                y_data[d,p,:,:] = numpy.linalg.solve(A_data[0,p,:,:],tmp)
+    
+    */
+    
     dstrideA = N*lda; dstrideB = NRHS*ldb;
     pstrideA = dstrideA*(D-1); pstrideB = dstrideB*(D-1);
     
