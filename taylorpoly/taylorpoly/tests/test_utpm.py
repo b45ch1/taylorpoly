@@ -1,7 +1,7 @@
 from numpy.testing import TestCase, assert_array_almost_equal, assert_almost_equal, assert_equal
 import numpy
 
-from taylorpoly.utpm import UTPM, solve, add
+from taylorpoly.utpm import UTPM, solve, add, sub, dot
 
 class test_global_functions(TestCase):
     def test_add(self):
@@ -17,6 +17,19 @@ class test_global_functions(TestCase):
         y = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
         z = sub(x,y)
         assert_array_almost_equal(z.data, x.data - y.data)
+        
+    def test_dot(self):
+        P,D,N = 1,2,3
+        x = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
+        y = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
+        z = dot(x,y)
+        
+        
+        assert_array_almost_equal(z.coeff[0,0], numpy.dot(x.coeff[0,0], y.coeff[0,0]))
+        assert_array_almost_equal(z.coeff[0,1], numpy.dot(x.coeff[0,1], y.coeff[0,0]) + numpy.dot(x.coeff[0,0], y.coeff[0,1]))
+        
+        
+        
 
 class Test_UTPM_methods(TestCase):
     
@@ -26,13 +39,13 @@ class Test_UTPM_methods(TestCase):
         b = UTPM(numpy.random.rand(P,D,N,1), shape = (N,1))
         # print A
         
-        x = solve(A,b)
+        # x = solve(A,b)
         
-        print A.data
-        print b.data
-        print x.data
+        # print A.data
+        # print b.data
+        # print x.data
         
-        print numpy.dot(A.data.reshape((N,N)), x.data) - b.data
+        # print numpy.dot(A.data.reshape((N,N)), x.data) - b.data
     
     
 

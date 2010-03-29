@@ -144,9 +144,7 @@ def add(x,y, out = None):
         return out
     
     P,D,N = x.P, x.D, numpy.prod(x._shape)
-    
-    # int P, int D, const int N, const double alpha, const double *x,
-    #              const int incx, double *y, const int incy
+
     _utpm.utpm_daxpy(P, D, N, 1., x.data.ctypes.data_as(c_double_ptr), 1,
     out.data.ctypes.data_as(c_double_ptr), 1)
     
