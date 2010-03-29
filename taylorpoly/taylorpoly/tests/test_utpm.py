@@ -3,39 +3,39 @@ import numpy
 
 from taylorpoly.utpm import UTPM, solve, add
 
-class Test_UTPM_methods(TestCase):
-    # def test_constructor(self):
-    #     P,D,N = 1,1,3
-    #     A = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
-    #     b = UTPM(numpy.random.rand(P,D,N,1), shape = (N,1))
-    #     # print A
-        
-    #     x = solve(A,b)
-        
-    #     print A.data
-    #     print b.data
-    #     print x.data
-        
-    #     print numpy.dot(A.data.reshape((N,N)), x.data) - b.data
-    
-    
-    def test_solve(self):
+class test_global_functions(TestCase):
+    def test_add(self):
         P,D,N = 1,2,3
+        x = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
+        y = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
+        z = add(x,y)
+        assert_array_almost_equal(z.data, x.data + y.data)
+
+    def test_sub(self):
+        P,D,N = 1,2,3
+        x = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
+        y = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
+        z = sub(x,y)
+        assert_array_almost_equal(z.data, x.data - y.data)
+
+class Test_UTPM_methods(TestCase):
+    
+    def test_constructor(self):
+        P,D,N = 1,1,3
         A = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
         b = UTPM(numpy.random.rand(P,D,N,1), shape = (N,1))
+        # print A
         
-        # b.coeff(0,1) *= 0
-        # tmp = b.coeff[0,1]
-        # tmp *= 0
+        x = solve(A,b)
         
-        b.coeff[0,1] *= 0
+        print A.data
+        print b.data
+        print x.data
         
-        print b
-       
-        # x = solve(A,b)
-        
-        # print numpy.dot(A.coeff(0,0), x.coeff(0,0)) - b.coeff(0,0)
-        # print numpy.dot(A.coeff(0,1), x.coeff(0,1)) - b.coeff(0,1)
+        print numpy.dot(A.data.reshape((N,N)), x.data) - b.data
+    
+    
+
         
         
     # def test_add(self):

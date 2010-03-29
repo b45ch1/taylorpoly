@@ -25,8 +25,16 @@ c_int_ptr    = ctypes.POINTER(ctypes.c_int)
 c_int        = ctypes.c_int
 c_double     = ctypes.c_double
 
+
+
+_utpm.utpm_dgemm.argtypes = [c_int, c_int, c_int,  c_int, c_int,  c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int, c_double, c_double_ptr, c_int]
+
 _utpm.utpm_daxpy.argtypes = [c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int]
 _utpm.utpm_dgesv.argtypes = [c_int, c_int, c_int, c_int, c_int, c_double_ptr, c_int, c_int_ptr, c_double_ptr, c_int]
+
+
+
+
 
 class UTPM:
     """
@@ -103,17 +111,14 @@ class UTPM:
                 start = N + p * N * (D-1) + N*(d-1)
                 stop  = N + p * N * (D-1) + N*d
                 self.x.data[start:stop].reshape(self.x._shape).__setitem__(Ellipsis, value)
-                
-                
-        
-        
+
         
     def __str__(self):
         """ return human readable string representation"""
-        ret_str =  'zero coefficient, d = 0:\n'
-        ret_str += str(self.data[:numpy.prod(self._shape)].reshape(self._shape)) + '\n'
-        ret_str += 'higher order coefficients, d >0:\n'
-        ret_str += str(self.data[numpy.prod(self._shape):].reshape((self.P,self.D-1) + self._shape))
+        ret_str =  '['
+        ret_str += str(self.data[:numpy.prod(self._shape)].reshape(self._shape)) + '],\n'
+        ret_str += '['
+        ret_str += str(self.data[numpy.prod(self._shape):].reshape((self.P,self.D-1) + self._shape)) + ']'
         return ret_str
         
     def __repr__(self):
@@ -127,13 +132,9 @@ class UTPM:
     def __zeros_like__(self):
         """ returns a copy of self with all elements set to zero"""
         return self.__class__(numpy.zeros_like(self.data), shape = self._shape, P = self.P)
-          
-
 
 def add(x,y, out = None):
     """ computes z = x+y in Taylor arithmetic
-    
-    if out = y, then  y = x + y is computed.
     """
     if out == None:
         out = y.copy()
@@ -142,12 +143,57 @@ def add(x,y, out = None):
         out.data *= 2
         return out
     
-    P,D,N = x.P, x.D, x._shape[0]
+    P,D,N = x.P, x.D, numpy.prod(x._shape)
     
     # int P, int D, const int N, const double alpha, const double *x,
     #              const int incx, double *y, const int incy
     _utpm.utpm_daxpy(P, D, N, 1., x.data.ctypes.data_as(c_double_ptr), 1,
     out.data.ctypes.data_as(c_double_ptr), 1)
+    
+    return out
+    
+def sub(x,y, out = None):
+    """ computes z = x-y in Taylor arithmetic
+
+    """
+    if out == None:
+        out = x.copy()
+        
+    if id(x) == id(y) and id(y) == id(out):
+        out.data *= 0
+        return out
+    
+    P,D,N = x.P, x.D, numpy.prod(x._shape)
+
+    _utpm.utpm_daxpy(P, D, N, -1., y.data.ctypes.data_as(c_double_ptr), 1,
+    out.data.ctypes.data_as(c_double_ptr), 1)
+    
+    return out
+    
+    
+def dot(x,y, out = None):
+    """ computes z = dot(x,y) in Taylor arithmetic
+
+    """
+    
+    if len(x._shape) != 2 or len(y._shape) != 2:
+        raise NotImplementedError('only 2d arrays work right now')
+        
+    if id(x) == id(y):
+        raise ValueError('x and y may not be the same')
+        
+    P,D,M,K,N = x.P, x.D, x._shape[0], x._shape[1], y._shape[1]
+    
+    if out == None:
+        out = UTPM(numpy.zeros(N*M + (D-1) * N*M * P), P=P, shape = (M,N))
+
+    A,B,C = x, y, out
+    order = 101 # row major
+    trans = 111 # no trans
+    lda, ldb, ldc = M, K, M
+        
+    _utpm.utpm_dgemm(P, D, order, trans, trans, M, N, K, 1., A.data.ctypes.data_as(c_double_ptr),
+        lda, B.data.ctypes.data_as(c_double_ptr), ldb, 0., C.data.ctypes.data_as(c_double_ptr), ldc)
     
     return out
 

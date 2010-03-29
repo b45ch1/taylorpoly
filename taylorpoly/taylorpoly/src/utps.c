@@ -28,33 +28,10 @@ int utps_sub(int P, int D, double *x, double *y, double *z ){
        $ z_d = x_d - y_d$
         
     */
-    int d,p;
-    double *zd, *xd, *yd;
-    double *zp, *xp, *yp;
-    
-    /* input checks */
-    if(z == y) return -1;
-    
-    zd = z;
-    yd = y;
-    xd = x;
-    
-    /* d = 0: base point z_0 */
-    (*zd) = (*xd) - (*yd);
-
-    /* d > 0: higher order coefficients */
-    for(p = 0; p < P; ++p){
-        xp = x + p*(D-1);
-        yp = y + p*(D-1);
-        zp = z + p*(D-1);
-        
-        /* compute x_d y_d for 0<d<D */
-        for(d = 1; d < D; ++d){
-            zd = zp + d;
-            xd = xp + d;
-            yd = yp + d;
-            (*zd) = (*xd) - (*yd);
-        }
+    int i;
+    for(i = 0; i < 1 + (D-1)*P; ++i){
+        (*z) = (*x) - (*y);
+        ++z; ++x; ++y;
     }
     return 0;
 }
