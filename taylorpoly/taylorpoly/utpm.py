@@ -81,6 +81,24 @@ class UTPM:
     def __zeros_like__(self):
         """ returns a copy of self with all elements set to zero"""
         return self.__class__(numpy.zeros_like(self.data), shape = self._shape, P = self.P)
+        
+    
+    def coeff(self, p, d):
+        if d >= self.D:
+            raise ValueError('d is too large')
+        if p >= self.P:
+            raise ValueError('p is too large')
+            
+        if d == 0:
+            return self.data[:numpy.prod(self._shape)].reshape(self._shape)
+        
+        else:
+            N = numpy.prod(self._shape)
+            D = self.D
+            start = N + p * N * (D-1) + N*(d-1)
+            stop  = N + p * N * (D-1) + N*d
+            return self.data[start:stop].reshape(self._shape)
+        
 
 
 def add(x,y, out = None):
@@ -105,14 +123,6 @@ def add(x,y, out = None):
     return out
 
 
-def cauchy_product(d,A,B, out = None):
-    P,D,N,K = A.P, A.D, A._shape
-    K,M = B._shape
-    
-    if out == None:
-        out = UTPM( numpy.zeros(N*M*P*(D-1)+N*M), P = P, shape = (N,M))
-    
-
 def solve(A,B):
     """
     solves A X = B in Taylor arithmetic
@@ -130,13 +140,6 @@ def solve(A,B):
     ipiv = numpy.zeros(N,dtype=int)
     ldb = N
 
-# utpm_dgesv(int P, int D, const enum CBLAS_ORDER Order,
-#                   const int N, const int NRHS,
-#                   double *A, const int lda, int *ipiv,
-#                   double *B, const int ldb){
-
-    # ipiv.ctypes.data_as(c_int_ptr)
-    # A.data.ctypes.data_as(c_double_ptr)
     _utpm.utpm_dgesv(P,D, order, N, NRHS, A.data.ctypes.data_as(c_double_ptr),
         lda, ipiv.ctypes.data_as(c_int_ptr), B.data.ctypes.data_as(c_double_ptr), ldb)
     

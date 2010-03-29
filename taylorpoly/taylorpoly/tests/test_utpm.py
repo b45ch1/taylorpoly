@@ -17,15 +17,26 @@ class Test_UTPM_methods(TestCase):
     #     print x.data
         
     #     print numpy.dot(A.data.reshape((N,N)), x.data) - b.data
+    
+    
+    def test_solve(self):
+        P,D,N = 1,2,3
+        A = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
+        b = UTPM(numpy.random.rand(P,D,N,1), shape = (N,1))
+       
+        x = solve(A,b)
+        
+        # print numpy.dot(A.coeff(0,0), x.coeff(0,0)) - b.coeff(0,0)
+        print numpy.dot(A.coeff(0,1), x.coeff(0,1)) - b.coeff(0,1)
         
         
-    def test_add(self):
-        P,D,N = 3,7,3
-        x = UTPM(numpy.random.rand(P,D,N), shape = (N,))
-        y = UTPM(numpy.random.rand(P,D,N), shape = (N,))
+    # def test_add(self):
+    #     P,D,N = 3,7,3
+    #     x = UTPM(numpy.random.rand(P,D,N), shape = (N,))
+    #     y = UTPM(numpy.random.rand(P,D,N), shape = (N,))
         
-        z = add(x,y)
-        assert_array_almost_equal(z.data, x.data + y.data)
+    #     z = add(x,y)
+    #     assert_array_almost_equal(z.data, x.data + y.data)
         
         
 

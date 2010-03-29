@@ -1,47 +1,46 @@
 #include <clapack.h>
 
 
-int utpm_cauchy_product(int P, int D, int d, const enum CBLAS_ORDER Order, const enum CBLAS_TRANSPOSE TransA,
+int utpm_cauchy_product(int P, int D, int p, int d, int dA, int dB, const enum CBLAS_ORDER Order, const enum CBLAS_TRANSPOSE TransA,
                  const enum CBLAS_TRANSPOSE TransB, const int M, const int N,
                  const int K, const double alpha, const double *A,
                  const int lda, const double *B, const int ldb,
                  const double beta, double *C, const int ldc){
 
     /* computes the convolution of two matrices, i.e.
-     C[d] := alpha * sum ( op( A[:d+1] )*op( B[:d+1:-1] )) + beta * C[d],
+     C := alpha * sum ( op( A[dA:dA+d+1] )*op( B[dB:dB+d+1:-1] )) + beta * C,
+     
+     for one direction p.
      
      See http://www.netlib.org/blas/dgemm.f for documentation.
     */
     
-    int p;
-    int k, dstrideA, dstrideB, dstrideC, pstrideA, pstrideB, pstrideC;
-    double *Ad, *Bd, *Cd;
-    double *Ap, *Bp, *Cp;
+    int k, dstrideA, dstrideB;
+    const double *Ad, *Bd;
     
-    dstrideA = K*lda; dstrideB = N*ldb; dstrideC = N*ldc;
-    pstrideA = dstrideA*(D-1); pstrideB = dstrideB*(D-1); pstrideC = dstrideC*(D-1);
+    dstrideA = K*lda; dstrideB = N*ldb;
     
-    Ap = A + dstrideA; Bp = B + dstrideB; Cp = C + dstrideC;
-    
-    for(p=0; p < P; ++p){
-        Bd = Bp + dstrideB * (d-1);
-        Cd = Cp + dstrideC * (d-1);
-
-        /* compute C_d = alpha A_0 B_d + beta C */
-        cblas_dgemm(Order, TransA, TransB, M, N, K, alpha, A,
-             lda, Bd, ldb, beta, Cd, ldc);
+    if(dA > 0 && dB == 0) {
+        Ad = A + dstrideA;
+        Bd = B + dstrideB + p*dstrideB*(dB + d - 1);
         
-        for(k = 1; k < d; ++k){
+        for(k = dA + 1; k < d+dA; ++k){
+            cblas_dgemm(Order, TransA, TransB, M, N, K, alpha, Ad,
+             lda, B, ldb, beta, C, ldc);
+                                                                      
+            Ad += dstrideA; Bd -= dstrideB;
         }
         
         /* compute C_d = alpha A_d B_0 + beta C_d */
-        Ad = Ap + dstrideB * (d-1);
         cblas_dgemm(Order, TransA, TransB, M, N, K, alpha, Ad,
-             lda, B, ldb, beta, Cd, ldc);
-        
+             lda, B, ldb, beta, C, ldc);
+            
+        return 0;
+    }
+    else{
+        return -1;
     }
     
-    return 0;
 }
 
 int utpm_daxpy(int P, int D, const int N, const double alpha, const double *x,
@@ -85,15 +84,33 @@ int utpm_dgesv(int P, int D, const enum CBLAS_ORDER Order,
     */
     
     int d,p;
-    int k, dstrideA, dstrideB, pstrideA, pstrideB;
-    double *Ad, *Bd;
-    double *Ap, *Bp;
+    int dstrideA, dstrideB, pstrideA, pstrideB;
+    double *Bd;
+    double *Bp;
     
     /* compute d = 0 */
     clapack_dgesv(Order, N, NRHS, A, lda, ipiv, B, ldb);
     
     /* compute higher order coefficients d > 0 */
-
+    dstrideA = N*lda; dstrideB = NRHS*ldb;
+    pstrideA = dstrideA*(D-1); pstrideB = dstrideB*(D-1);
+    
+    Bp = B + dstrideB;
+    for( p = 0; p < P; ++p){
+        Bd = Bp;
+        for( d = 1; d < D; ++d){
+            /* compute B_d - \sum_{k=1}^d A_k B_{d-k} */
+            utpm_cauchy_product(P, D, p, d, 1, 0, Order, CblasNoTrans, CblasNoTrans,
+                              N, NRHS, N, -1., A, lda, B, ldb, 1., Bd, ldb);
+            
+            /* compute solve(A_0,  B_d - \sum_{k=1}^d A_k B_{d-k}
+               where A_0 is LU factorized already            */
+            clapack_dgetrs(Order, CblasNoTrans, N, NRHS, A, lda, ipiv, Bd, ldb);
+            
+            Bd += dstrideB;
+        }
+        Bp += pstrideB;
+    }
 
     
     return 0;
