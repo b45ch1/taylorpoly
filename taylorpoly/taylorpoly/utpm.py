@@ -30,7 +30,7 @@ c_double     = ctypes.c_double
 _utpm.utpm_dgemm.argtypes = [c_int, c_int, c_int,  c_int, c_int,  c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int, c_double, c_double_ptr, c_int]
 
 _utpm.utpm_daxpy.argtypes = [c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int]
-_utpm.utpm_dgesv.argtypes = [c_int, c_int, c_int, c_int, c_int, c_double_ptr, c_int, c_int_ptr, c_double_ptr, c_int]
+_utpm.utpm_dgesv.argtypes = [c_int, c_int, c_int, c_int, c_int, c_int, c_double_ptr, c_int, c_int_ptr, c_double_ptr, c_int]
 
 
 
@@ -205,7 +205,8 @@ def solve(A,B):
     B = B.copy()
     
     P,D = A.P,A.D
-    order = 101 # row major
+    order = 101 # col major 102 # row major 101
+    trans = 111 # no trans
     
     N = A._shape[0]
     NRHS = B._shape[1]
@@ -213,7 +214,7 @@ def solve(A,B):
     ipiv = numpy.zeros(N,dtype=int)
     ldb = N
 
-    _utpm.utpm_dgesv(P,D, order, N, NRHS, A.data.ctypes.data_as(c_double_ptr),
+    _utpm.utpm_dgesv(P,D, order,trans, N, NRHS, A.data.ctypes.data_as(c_double_ptr),
         lda, ipiv.ctypes.data_as(c_int_ptr), B.data.ctypes.data_as(c_double_ptr), ldb)
     
     return B

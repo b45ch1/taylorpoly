@@ -1,4 +1,6 @@
+#include <cblas.h>
 #include <clapack.h>
+#include <stdio.h>
 
 
 int utpm_cauchy_product(int P, int D, int p, int d, int dA, int dB, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
@@ -44,6 +46,7 @@ int utpm_cauchy_product(int P, int D, int p, int d, int dA, int dB, enum CBLAS_O
 
 int utpm_dscal(int P, int D, int N, double alpha, double *X, int incX){
     cblas_dscal(N + (D-1)*P*N, alpha, X, incX);
+    return 0;
 }
 
 int utpm_daxpy(int P, int D, int N, double alpha, double *x,
@@ -165,61 +168,74 @@ int utpm_dgemm(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA
 }
 
 
-int utpm_dgesv(int P, int D, enum CBLAS_ORDER Order,
+int utpm_dgesv(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                   int N, int NRHS,
                   double *A, int lda, int *ipiv,
                   double *B, int ldb){
     /*
-    Solves the linear system A X = B in Taylor arithmetic.
-    See the documentation of http://www.netlib.org/lapack/double/dgesv.f
-    and http://www.netlib.org/lapack/double/dgetrs.f for details.
-    The API is the modification of the clapack.h API.
+    Solves the linear system op(A) X = B in Taylor arithmetic,
+    
+    where op(A) = A or op(A) = A**T
+    
+    A (N,N) matrix.
+    B (N,NRHS) matrix
+    
+    This is a modification of the API of dgesv.f: added possiblity enum CBLAS_TRANSPOSE TransA
+    to the function argument list.Compare to http://www.netlib.org/lapack/double/dgesv.f.
+    
+    The solution is computed by:
+    1) clapack_dgetrf (see http://www.netlib.org/lapack/double/dgetrf.f)
+    2) clapack_dgetrs (see http://www.netlib.org/lapack/double/dgetrs.f)
+
     */
     
     int d,p;
     int dstrideA, dstrideB, pstrideA, pstrideB;
-    double *Bd;
-    double *Bp;
+    double *Ad, *Bd;
+    double *Ap, *Bp;
+    
+    int k;
+    
+    
+    /* input checks */
+    if(Order != 101){
+        printf("Order != 101 has not been implemented yet!\n");
+        return -1;
+    }
     
     /* compute d = 0 */
-    clapack_dgesv(Order, N, NRHS, A, lda, ipiv, B, ldb);
+    /* first A = P L U, i.e. LU with partial pivoting */
+    
+    clapack_dgetrf(Order, N, N, A, lda, ipiv);
+    clapack_dgetrs(Order, TransA, N, NRHS, A, lda, ipiv, B, ldb);
+    /* clapack_dgesv(Order, N, NRHS, A, lda, ipiv, B, ldb); */
     
     /* compute higher order coefficients d > 0 */
-    
-    /*
-        # d = 0:  base point
-        for p in range(P):
-            y_data[0,p,...] = numpy.linalg.solve(A_data[0,p,...], x_data[0,p,...])
-
-        # d = 1,...,D-1
-        tmp = numpy.zeros((M,K),dtype=float)
-        for d in range(1, D):
-            for p in range(P):
-                tmp[:,:] = x_data[d,p,:,:]
-                for k in range(1,d+1):
-                    tmp[:,:] -= numpy.dot(A_data[k,p,:,:],y_data[d-k,p,:,:])
-                y_data[d,p,:,:] = numpy.linalg.solve(A_data[0,p,:,:],tmp)
-    
-    */
-    
     dstrideA = N*lda; dstrideB = NRHS*ldb;
     pstrideA = dstrideA*(D-1); pstrideB = dstrideB*(D-1);
     
-    Bp = B + dstrideB;
     for( p = 0; p < P; ++p){
-        Bd = Bp;
+        Ap = A + p*pstrideA;
+        Bp = B + p*pstrideB;
         for( d = 1; d < D; ++d){
             /* compute B_d - \sum_{k=1}^d A_k B_{d-k} */
-            utpm_cauchy_product(P, D, p, d, 1, 0, Order, CblasNoTrans, CblasNoTrans,
-                              N, NRHS, N, -1., A, lda, B, ldb, 1., Bd, ldb);
+            
+            for(k=1; k < d; ++k){
+                // Bd = Bp + (d-1) * dstrideB;
+                
+            }
+            
+            Ad = Ap + dstrideA;
+            Bd = Bp + dstrideB;
+            
+            /* FIXME: why the hell is now ldb = NRHS??? */
+            cblas_dgemm(Order, TransA, CblasNoTrans, N, NRHS,
+                 N, -1., Ad, lda, B, NRHS, 1., Bd, NRHS);
             
             /* compute solve(A_0,  B_d - \sum_{k=1}^d A_k B_{d-k}
                where A_0 is LU factorized already            */
-            clapack_dgetrs(Order, CblasNoTrans, N, NRHS, A, lda, ipiv, Bd, ldb);
-            
-            Bd += dstrideB;
+            clapack_dgetrs(Order, TransA, N, NRHS, A, lda, ipiv, Bd, ldb);
         }
-        Bp += pstrideB;
     }
 
     
