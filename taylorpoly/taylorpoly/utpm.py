@@ -212,7 +212,7 @@ def solve(A,B):
     B = B.copy()
     
     P,D = A.P,A.D
-    order = 101 # col major 102 # row major 101
+    order = 102 # col major 102 # row major 101
     trans = 111 # no trans
     
     N = A._shape[0]

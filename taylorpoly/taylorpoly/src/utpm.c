@@ -197,7 +197,7 @@ int utpm_dgesv(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA
     int k;
     
     /* input checks */
-    if(Order != 101){
+    if(Order != 102){
         printf("Order != 101 has not been implemented yet!\n");
         return -1;
     }
@@ -210,7 +210,7 @@ int utpm_dgesv(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA
     /* clapack_dgesv(Order, N, NRHS, A, lda, ipiv, B, ldb); */
     
     /* compute higher order coefficients d > 0 */
-    dstrideA = N*lda; dstrideB = NRHS*ldb;
+    dstrideA = lda*N; dstrideB = ldb*NRHS;
     pstrideA = dstrideA*(D-1); pstrideB = dstrideB*(D-1);
     
     for( p = 0; p < P; ++p){
@@ -223,7 +223,7 @@ int utpm_dgesv(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA
                 Bd = Bp + (d-k) * dstrideB;
                 /* FIXME: why the hell is now ldb = NRHS??? */
                 cblas_dgemm(Order, TransA, CblasNoTrans, N, NRHS,
-                     N, -1., Ad, lda, Bd, NRHS, 1., Bp + d*dstrideB, NRHS);
+                     N, -1., Ad, lda, Bd, ldb, 1., Bp + d*dstrideB, ldb);
             }
             
             /* compute the last loop element, i.e. k = d */
@@ -231,7 +231,7 @@ int utpm_dgesv(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA
             
             /* FIXME: why the hell is now ldb = NRHS??? */
             cblas_dgemm(Order, TransA, CblasNoTrans, N, NRHS,
-                 N, -1., Ad, lda, B, NRHS, 1., Bd, NRHS);
+                 N, -1., Ad, lda, B, ldb, 1., Bd, ldb);
             
             /* compute solve(A_0,  B_d - \sum_{k=1}^d A_k B_{d-k}
                where A_0 is LU factorized already            */
