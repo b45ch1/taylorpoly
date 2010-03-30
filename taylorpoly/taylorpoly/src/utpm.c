@@ -196,7 +196,6 @@ int utpm_dgesv(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA
     
     int k;
     
-    
     /* input checks */
     if(Order != 101){
         printf("Order != 101 has not been implemented yet!\n");
@@ -219,14 +218,16 @@ int utpm_dgesv(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA
         Bp = B + p*pstrideB;
         for( d = 1; d < D; ++d){
             /* compute B_d - \sum_{k=1}^d A_k B_{d-k} */
-            
             for(k=1; k < d; ++k){
-                // Bd = Bp + (d-1) * dstrideB;
-                
+                Ad = Ap + k * dstrideA;
+                Bd = Bp + (d-k) * dstrideB;
+                /* FIXME: why the hell is now ldb = NRHS??? */
+                cblas_dgemm(Order, TransA, CblasNoTrans, N, NRHS,
+                     N, -1., Ad, lda, Bd, NRHS, 1., Bp + d*dstrideB, NRHS);
             }
             
-            Ad = Ap + dstrideA;
-            Bd = Bp + dstrideB;
+            /* compute the last loop element, i.e. k = d */
+            Ad = Ap + d*dstrideA;   Bd = Bp + d*dstrideB;
             
             /* FIXME: why the hell is now ldb = NRHS??? */
             cblas_dgemm(Order, TransA, CblasNoTrans, N, NRHS,

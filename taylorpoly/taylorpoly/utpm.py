@@ -133,6 +133,13 @@ class UTPM:
         """ returns a copy of self with all elements set to zero"""
         return self.__class__(numpy.zeros_like(self.data), shape = self._shape, P = self.P)
 
+    def __add__(self, other):
+        return add(self,other)
+        
+    def __sub__(self, other):
+        return sub(self,other)
+
+
 def add(x,y, out = None):
     """ computes z = x+y in Taylor arithmetic
     """
