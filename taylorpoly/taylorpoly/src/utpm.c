@@ -85,6 +85,19 @@ int utpm_dgemm(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA
     
     C = alpha A B + beta C
     
+    dimensions:
+    -----------
+    A is a (M,K) matrix
+    B is a (K,N) matrix
+    C is a (M,N) matrix
+    
+    leading dimensions:
+    -------------------
+    
+    FIXME: check if this is correct
+    if A CblasRowMajor then the leading dimension switches it's place.
+    E.g. A (M,K) CblasRowMajor matrix is a contiguous (M,lda) memory block
+    
     The implementation decomposes the above expression as
     C = beta C
     C = alpha A B + C
@@ -97,9 +110,15 @@ int utpm_dgemm(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA
     
     int pstrideA, pstrideB, pstrideC;
     int dstrideA, dstrideB, dstrideC;
+    
+    /* input checks */
+    if(TransA != 111 || TransB != 111 || Order != 101){
+        printf("The case TransA != 111 || TransB != 111 || Order != 101 has not been implemented yet!\n");
+        return -1;
+    }
 
     /* d > 0: higher order coefficients */
-    dstrideA = K*lda; dstrideB = N*ldb; dstrideC = N*ldb;
+    dstrideA = M*lda; dstrideB = K*ldb; dstrideC = M*ldc;
     pstrideA = (D-1)*dstrideA; pstrideB = (D-1)*dstrideB; pstrideC = (D-1)*dstrideC;
     
     for(p = 0; p < P; ++p){

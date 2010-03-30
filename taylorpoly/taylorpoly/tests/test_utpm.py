@@ -5,30 +5,30 @@ from taylorpoly.utpm import UTPM, solve, add, sub, dot
 
 class test_global_functions(TestCase):
     def test_add(self):
-        P,D,N = 1,2,3
+        P,D,N = 3,4,3
         x = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
         y = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
         z = add(x,y)
         assert_array_almost_equal(z.data, x.data + y.data)
 
     def test_sub(self):
-        P,D,N = 1,2,3
+        P,D,N = 3,4,3
         x = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
         y = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
         z = sub(x,y)
         assert_array_almost_equal(z.data, x.data - y.data)
         
+
     def test_dot(self):
-        P,D,N = 1,2,3
-        x = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
-        y = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
+        P,D,M,K,N = 3,2,5,2,3
+        x = UTPM(numpy.random.rand(P,D,M,K), shape = (M,K), P = P)
+        y = UTPM(numpy.random.rand(P,D,K,N), shape = (K,N), P = P)
+        
         z = dot(x,y)
         
-        
         assert_array_almost_equal(z.coeff[0,0], numpy.dot(x.coeff[0,0], y.coeff[0,0]))
-        assert_array_almost_equal(z.coeff[0,1], numpy.dot(x.coeff[0,1], y.coeff[0,0]) + numpy.dot(x.coeff[0,0], y.coeff[0,1]))
-        
-        
+        for p in range(P):
+            assert_array_almost_equal(z.coeff[p,1], numpy.dot(x.coeff[p,1], y.coeff[p,0]) + numpy.dot(x.coeff[p,0], y.coeff[p,1]))
         
 
 class Test_UTPM_methods(TestCase):

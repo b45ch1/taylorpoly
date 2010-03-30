@@ -6,7 +6,6 @@ from taylorpoly import *
 
 
 
-
 # P,D,N = 1,2,3
 # A = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
 # b = UTPM(numpy.random.rand(P,D,N,1), shape = (N,1))

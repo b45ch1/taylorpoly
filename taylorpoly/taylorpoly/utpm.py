@@ -55,7 +55,7 @@ class UTPM:
         
         """
         
-        if P != 1 or shape == ():
+        if shape == ():
             raise NotImplementedError('should implement that')
         
         tmp = numpy.prod(shape)
@@ -188,7 +188,7 @@ def dot(x,y, out = None):
     A,B,C = x, y, out
     order = 101 # row major
     trans = 111 # no trans
-    lda, ldb, ldc = M, K, M
+    lda, ldb, ldc = K, N, N
         
     _utpm.utpm_dgemm(P, D, order, trans, trans, M, N, K, 1., A.data.ctypes.data_as(c_double_ptr),
         lda, B.data.ctypes.data_as(c_double_ptr), ldb, 0., C.data.ctypes.data_as(c_double_ptr), ldc)
