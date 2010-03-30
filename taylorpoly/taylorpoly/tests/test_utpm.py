@@ -17,7 +17,6 @@ class test_global_functions(TestCase):
         y = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
         z = sub(x,y)
         assert_array_almost_equal(z.data, x.data - y.data)
-        
 
     def test_dot(self):
         P,D,M,K,N = 3,2,5,2,3
@@ -29,6 +28,15 @@ class test_global_functions(TestCase):
         assert_array_almost_equal(z.coeff[0,0], numpy.dot(x.coeff[0,0], y.coeff[0,0]))
         for p in range(P):
             assert_array_almost_equal(z.coeff[p,1], numpy.dot(x.coeff[p,1], y.coeff[p,0]) + numpy.dot(x.coeff[p,0], y.coeff[p,1]))
+        
+    def test_solve(self):
+        P,D,N,M = 3,3,6,3
+        A = UTPM(numpy.random.rand((P*(D-1)+1)*N*N), shape = (N,N), P = P)
+        b = UTPM(numpy.random.rand((P*(D-1)+1)*N*M), shape = (N,M), P = P)
+        
+        x = solve(A,b)
+        
+        assert_array_almost_equal(dot(A,x).data,b.data)
         
 
 class Test_UTPM_methods(TestCase):
