@@ -115,13 +115,13 @@ int utpm_dgemm(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA
     int dstrideA, dstrideB, dstrideC;
     
     /* input checks */
-    if(TransA != 111 || TransB != 111 || Order != 101){
+    if(TransA != 111 || TransB != 111 || Order != 102){
         printf("The case TransA != 111 || TransB != 111 || Order != 101 has not been implemented yet!\n");
         return -1;
     }
 
     /* d > 0: higher order coefficients */
-    dstrideA = M*lda; dstrideB = K*ldb; dstrideC = M*ldc;
+    dstrideA = lda*K; dstrideB = ldb*N; dstrideC = ldc*N;
     pstrideA = (D-1)*dstrideA; pstrideB = (D-1)*dstrideB; pstrideC = (D-1)*dstrideC;
     
     for(p = 0; p < P; ++p){

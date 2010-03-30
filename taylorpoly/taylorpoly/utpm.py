@@ -47,7 +47,7 @@ class UTPM:
         """
         data = [x_0, x_{1,1}, x_{1,2}, ..., x_{1,P}, ..., x_{D-1,P}]
         is a flat, contiguous array of
-        x_{d,p} is an array of arbitrary shape shp.
+        x_{d,p} is an array of arbitrary shape shp in column major memory layout.
         
         
         For convenience, if P = 1, it is possible to provide data as a
@@ -86,14 +86,14 @@ class UTPM:
                 raise ValueError('p is too large')
                 
             if d == 0:
-                return self.x.data[:numpy.prod(self.x._shape)].reshape(self.x._shape)
+                return self.x.data[:numpy.prod(self.x._shape)].reshape(self.x._shape[::-1]).T
             
             else:
                 N = numpy.prod(self.x._shape)
                 D = self.x.D
                 start = N + p * N * (D-1) + N*(d-1)
                 stop  = N + p * N * (D-1) + N*d
-                return self.x.data[start:stop].reshape(self.x._shape)
+                return self.x.data[start:stop].reshape(self.x._shape[::-1]).T
                 
         def __setitem__(self, sl, value):
             p,d = sl
@@ -103,14 +103,14 @@ class UTPM:
                 raise ValueError('p is too large')
                 
             if d == 0:
-                self.x.data[:numpy.prod(self.x._shape)].reshape(self.x._shape).__setitem__(Ellipsis, value)
+                self.x.data[:numpy.prod(self.x._shape)].reshape(self.x._shape[::-1]).T.__setitem__(Ellipsis, value)
             
             else:
                 N = numpy.prod(self.x._shape)
                 D = self.x.D
                 start = N + p * N * (D-1) + N*(d-1)
                 stop  = N + p * N * (D-1) + N*d
-                self.x.data[start:stop].reshape(self.x._shape).__setitem__(Ellipsis, value)
+                self.x.data[start:stop].reshape(self.x._shape[::-1]).T.__setitem__(Ellipsis, value)
 
         
     def __str__(self):
@@ -193,9 +193,9 @@ def dot(x,y, out = None):
         out = UTPM(numpy.zeros(N*M + (D-1) * N*M * P), P=P, shape = (M,N))
 
     A,B,C = x, y, out
-    order = 101 # row major
+    order = 102 # column major
     trans = 111 # no trans
-    lda, ldb, ldc = K, N, N
+    lda, ldb, ldc = M, K, M
         
     _utpm.utpm_dgemm(P, D, order, trans, trans, M, N, K, 1., A.data.ctypes.data_as(c_double_ptr),
         lda, B.data.ctypes.data_as(c_double_ptr), ldb, 0., C.data.ctypes.data_as(c_double_ptr), ldc)
