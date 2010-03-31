@@ -131,7 +131,8 @@ class UTPS:
         
     def __repr__(self):
         """ return data that allows to reconstruct the instance"""
-        ret_str = 'UTPS(%s, %d, %d)'%(str(self.data), self.P)
+        ret_str = 'UTPS(%s, %d, %d)'%(str(self.data), self.P, self.D)
+        return ret_str
 
     def __zeros_like__(self):
         """ returns a copy of self with all elements set to zero"""
