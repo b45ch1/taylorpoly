@@ -22,5 +22,5 @@ from taylorpoly.utps import UTPS, add, sub, mul, div, amul, sqrt, log, exp, pow,
 from taylorpoly.utps_epb import epb_add, epb_sub, epb_mul, epb_div
 
 
-from taylorpoly.utpm import UTPM, add, sub, dot, solve
+from taylorpoly.utpm import UTPM, add, sub, mul, dot, solve
 

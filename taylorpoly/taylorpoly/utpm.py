@@ -25,15 +25,14 @@ c_int_ptr    = ctypes.POINTER(ctypes.c_int)
 c_int        = ctypes.c_int
 c_double     = ctypes.c_double
 
+_utpm.imul.argtypes = [c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int, c_double_ptr, c_int]
+_utpm.utpm_imul.argtypes = [c_int, c_int, c_int, c_int, c_double_ptr, c_int, c_double_ptr, c_int]
 
 
 _utpm.utpm_dgemm.argtypes = [c_int, c_int, c_int,  c_int, c_int,  c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int, c_double, c_double_ptr, c_int]
 
 _utpm.utpm_daxpy.argtypes = [c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int]
 _utpm.utpm_dgesv.argtypes = [c_int, c_int, c_int, c_int, c_int, c_int, c_double_ptr, c_int, c_int_ptr, c_double_ptr, c_int]
-
-
-
 
 
 class UTPM:
@@ -174,6 +173,24 @@ def sub(x,y, out = None):
     out.data.ctypes.data_as(c_double_ptr), 1)
     
     return out
+
+def mul(x, y, out = None):
+    """ computes z = x * y
+    """
+    
+    print x._shape
+    P,D = x.P, x.D
+    M,N = x._shape
+    
+    if out == None:
+        out = y.copy()
+    
+    _utpm.utpm_imul(P, D, M, N, out.data.ctypes.data_as(c_double_ptr), M,
+    x.data.ctypes.data_as(c_double_ptr), M)
+    
+    return out
+    
+    
     
     
 def dot(x,y, out = None):
