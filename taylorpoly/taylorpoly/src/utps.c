@@ -40,9 +40,12 @@ int utps_mul(int P, int D, double *x, double *y, double *z ){
     /* 
     computes  z = mul(x,y) in Taylor arithmetic
     
-    Latex::
+    math::
         
-        $u \cdot v $ & $\phi_d = \sum_{j=0}^d u_j  v_{d-j}$
+        z_d = \sum_{j=0}^d x_j  y_{d-j} \quad \forall d = 0,...,D-1
+        
+    In the case when z = x or z = y (i.e. the pointers point at the same memory block,
+    then x = mul(x,y) or y = mul(x,y) is computed.
         
     */
     int k,d,p;

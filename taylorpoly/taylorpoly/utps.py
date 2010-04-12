@@ -175,6 +175,9 @@ class UTPS:
     def cos(self):
         return cos(self)
         
+    def exp(self):
+        return exp(self)
+        
     def __abs__(self):
         if self.data[0] < 0:
             return self.__class__( -1.* self.data, self.P)

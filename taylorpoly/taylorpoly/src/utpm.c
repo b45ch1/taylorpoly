@@ -3,46 +3,7 @@
 #include <stdio.h>
 
 
-int utpm_cauchy_product(int P, int D, int p, int d, int dA, int dB, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
-                 enum CBLAS_TRANSPOSE TransB, int M, int N,
-                 int K, double alpha, double *A,
-                 int lda, double *B, int ldb,
-                 double beta, double *C, int ldc){
 
-    /* computes the convolution of two matrices, i.e.
-     C := alpha * sum ( op( A[dA:dA+d] )*op( B[dB:dB+1:-1] )) + beta * C,
-     
-     for one direction p.
-     
-     See http://www.netlib.org/blas/dgemm.f for documentation.
-    */
-    
-    int k, dstrideA, dstrideB;
-    double *Ad, *Bd;
-    
-    dstrideA = K*lda; dstrideB = N*ldb;
-    
-    if(dA > 0 && dB == 0) {
-        Ad = A + dstrideA;
-        Bd = B + dstrideB + p*dstrideB*(dB + d - 1);
-        
-        for(k = dA; k < d - 1 +dA; ++k){
-            cblas_dgemm(Order, TransA, TransB, M, N, K, alpha, Ad,
-             lda, Bd, ldb, beta, C, ldc);
-                                                                      
-            Ad += dstrideA; Bd -= dstrideB;
-        }
-        
-        /* compute C_d = alpha A_d B_0 + beta C_d */
-        cblas_dgemm(Order, TransA, TransB, M, N, K, alpha, Ad,
-             lda, B, ldb, beta, C, ldc);
-            
-        return 0;
-    }
-    else{
-        return -1;
-    }
-}
 
 int utpm_dscal(int P, int D, int N, double alpha, double *X, int incX){
     cblas_dscal(N + (D-1)*P*N, alpha, X, incX);
@@ -64,19 +25,77 @@ int utpm_daxpy(int P, int D, int N, double alpha, double *x,
     return 0;
 }
 
-double utpm_ddot(int P, int D, int N, double *x, int incx,
-    double *y, int incy){
+int daxmy(int P, int D, int N, double alpha, double *x, int incx, double *y, int incy){
+    /* y = alpha * x * y, where x,y double arrays of lenght N */
+    int p,d,n;
+    double *yp, *xp, *yd, *xd;
+    
+    for(p = 0; p < P; ++p){
+        for(n = 0; n < N; n += incx;){
+            *y = alpha * (*x) * 
+        }
+    }
 
-    /*
-    computes dot = x^T y
-    
-    See http://www.netlib.org/blas/ddot.f for documentation.
-    
-    */
-        return 0;
-    
 }
 
+int utpm_daxmy(int P, int D, int N, double alpha, double *x,  int incx, double *y, int incy){
+    /*
+    y = alpha * x * y
+    */
+    
+    int k,p,d,n;
+    double *zd, *xd, *yd;
+    double *zp, *xp, *yp;
+    int pstride;
+    
+    /* set pointer z to be equal to y and compute z = alpha * x * y */
+    z = y;
+    
+    /* set the strides */
+    pstride = (D-1)*N;
+
+    /* d > 0: higher order coefficients */
+    for(p = 0; p < P; ++p){
+        xp = x + p*pstride;
+        yp = y + p*pstride;
+        zp = z + p*pstride;
+        
+        for(d = D-1; 0 < d; --d){
+            zd = zp + d*N;
+            
+            /* compute x_0 y_d */
+            yd = yp + d;
+            cblas_daxpy(N, alpha*x[0], yd, incy, zd, incy);
+            
+            /* compute sum_{k=1}^{d-1} x_k y_{d-k} */
+            xd = xp + 1;
+            yd = yp + d - 1;
+            for(k = 1; k < d; ++k){
+                cblas_daxpy(N, 
+                zd += (*xd) * (*yd);
+                xd++;
+                yd--;
+            }
+            
+            /* compute x_d y_0 */
+            xd = xp + d;
+            tmp +=  (*xd) * y[0];
+            
+            (*zd) = tmp;
+        }
+    }
+    
+    
+    zd = z;
+    yd = y;
+    xd = x;
+    
+    /* d = 0: base point z_0 */
+    (*zd) = (*xd) * (*yd);
+    
+    
+
+}
 
 int utpm_dgemm(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  enum CBLAS_TRANSPOSE TransB, int M, int N,
@@ -242,4 +261,45 @@ int utpm_dgesv(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA
     
     return 0;
 }
+
+// int utpm_cauchy_product(int P, int D, int p, int d, int dA, int dB, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
+//                  enum CBLAS_TRANSPOSE TransB, int M, int N,
+//                  int K, double alpha, double *A,
+//                  int lda, double *B, int ldb,
+//                  double beta, double *C, int ldc){
+
+//     /* computes the convolution of two matrices, i.e.
+//      C := alpha * sum ( op( A[dA:dA+d] )*op( B[dB:dB+1:-1] )) + beta * C,
+     
+//      for one direction p.
+     
+//      See http://www.netlib.org/blas/dgemm.f for documentation.
+//     */
+    
+//     int k, dstrideA, dstrideB;
+//     double *Ad, *Bd;
+    
+//     dstrideA = K*lda; dstrideB = N*ldb;
+    
+//     if(dA > 0 && dB == 0) {
+//         Ad = A + dstrideA;
+//         Bd = B + dstrideB + p*dstrideB*(dB + d - 1);
+        
+//         for(k = dA; k < d - 1 +dA; ++k){
+//             cblas_dgemm(Order, TransA, TransB, M, N, K, alpha, Ad,
+//              lda, Bd, ldb, beta, C, ldc);
+                                                                      
+//             Ad += dstrideA; Bd -= dstrideB;
+//         }
+        
+//         /* compute C_d = alpha A_d B_0 + beta C_d */
+//         cblas_dgemm(Order, TransA, TransB, M, N, K, alpha, Ad,
+//              lda, B, ldb, beta, C, ldc);
+            
+//         return 0;
+//     }
+//     else{
+//         return -1;
+//     }
+// }
 
