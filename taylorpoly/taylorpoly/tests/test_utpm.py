@@ -1,7 +1,7 @@
 from numpy.testing import TestCase, assert_array_almost_equal, assert_almost_equal, assert_equal
 import numpy
 
-from taylorpoly.utpm import UTPM, solve, add, sub, dot
+from taylorpoly.utpm import UTPM, solve, add, sub, mul, dot
 
 class test_global_functions(TestCase):
     def test_add(self):
@@ -17,6 +17,27 @@ class test_global_functions(TestCase):
         y = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
         z = sub(x,y)
         assert_array_almost_equal(z.data, x.data - y.data)
+
+    def test_mul(self):
+        P,D,N,M = 4,3,3,2
+        x = UTPM(numpy.random.rand((P*(D-1)+1)*M*N), shape = (M,N), P = P)
+        y = UTPM(numpy.random.rand((P*(D-1)+1)*M*N), shape = (M,N), P = P)
+        z = mul(x,y)
+
+
+        # for p in range(P):
+        #     print 'p=',p
+        #     print z.coeff[p,0] - x.coeff[p,0] * y.coeff[p,0]
+        #     print z.coeff[p,1] - x.coeff[p,0] * y.coeff[p,1] - x.coeff[p,1] * y.coeff[p,0]
+        #     print z.coeff[p,2] - x.coeff[p,0] * y.coeff[p,2] - x.coeff[p,1] * y.coeff[p,1] - x.coeff[p,2] * y.coeff[p,0]
+        
+        for p in range(P):
+            assert_array_almost_equal( z.coeff[p,0], x.coeff[p,0] * y.coeff[p,0])
+            assert_array_almost_equal( z.coeff[p,1],  x.coeff[p,0] * y.coeff[p,1] + x.coeff[p,1] * y.coeff[p,0])
+            assert_array_almost_equal( z.coeff[p,2],  x.coeff[p,0] * y.coeff[p,2] + x.coeff[p,1] * y.coeff[p,1] + x.coeff[p,2] * y.coeff[p,0])
+        
+        
+        
 
     def test_dot(self):
         P,D,M,K,N = 3,2,5,2,3
@@ -42,9 +63,24 @@ class test_global_functions(TestCase):
 class Test_UTPM_methods(TestCase):
     
     def test_constructor(self):
-        P,D,N = 1,1,3
-        A = UTPM(numpy.random.rand(P,D,N,N), shape = (N,N))
-        b = UTPM(numpy.random.rand(P,D,N,1), shape = (N,1))
+        P,D,M,N = 5,3,2,7
+        tmp = numpy.arange( M*N*(1+ (D-1)*P))
+        A = UTPM(tmp , shape = (M,N), P = P)
+        
+        assert_equal(P, A.P)
+        assert_equal(D, A.D)
+        
+        assert_array_almost_equal(tmp, A.data)
+        
+    def test_coeff(self):
+        P,D,M,N = 1,3,2,7
+        tmp = numpy.arange( M*N*(1+ (D-1)*P)).reshape((D,M,N))
+        A = UTPM(tmp)
+        
+        for d in range(D):
+            assert_array_almost_equal(tmp[d], A.coeff[0,d])
+        
+
         # print A
         
         # x = solve(A,b)

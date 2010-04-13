@@ -44,7 +44,7 @@ class UTPM:
     
     def __init__(self, data, shape = (), P = 1):
         """
-        data = [x_0, x_{1,1}, x_{1,2}, ..., x_{1,P}, ..., x_{D-1,P}]
+        data = [x_0, x_{1,1}, x_{1,2}, ..., x_{1,P}, ..., x_{P,D-1}]
         is a flat, contiguous array of
         x_{d,p} is an array of arbitrary shape shp in column major memory layout.
         
@@ -54,19 +54,34 @@ class UTPM:
         
         """
         
+        data = numpy.asarray(data)
+        
         if shape == ():
-            raise NotImplementedError('should implement that')
-        
-        tmp = numpy.prod(shape)
-        D = (numpy.size(data)//tmp-1)//P + 1
-        
-        if not isinstance(shape,tuple):
-            shape = (shape,)
-        
-        self._shape = shape
-        self.D = D
-        self.P = P
-        self.data = numpy.ravel(data)
+            if P != 1:
+                raise ValueError('the general case with P>1 only works by setting the shape manually')
+            
+            if numpy.ndim(data) != 3:
+                err_str = 'data should be a 3D array\n'
+                err_str += 'but provided data.ndim = %d\n'%numpy.ndim(data)
+                raise ValueError(err_str)
+                
+            shp = numpy.shape(data)
+            self.D = shp[0]
+            self.P = P
+            self._shape = shp[1:]
+            self.data = numpy.ravel(data.transpose((0,2,1)))
+            
+        else:
+            tmp = numpy.prod(shape)
+            D = (numpy.size(data)//tmp-1)//P + 1
+            
+            if not isinstance(shape,tuple):
+                shape = (shape,)
+            
+            self._shape = shape
+            self.D = D
+            self.P = P
+            self.data = numpy.ravel(data)
         self.coeff = self.Coeff(self)
         
     class Coeff:
@@ -115,9 +130,9 @@ class UTPM:
     def __str__(self):
         """ return human readable string representation"""
         ret_str =  '['
-        ret_str += str(self.data[:numpy.prod(self._shape)].reshape(self._shape)) + '],\n'
+        ret_str += str(self.data[:numpy.prod(self._shape)].reshape(self._shape[::-1]).T) + '],\n'
         ret_str += '['
-        ret_str += str(self.data[numpy.prod(self._shape):].reshape((self.P,self.D-1) + self._shape)) + ']'
+        ret_str += str(self.data[numpy.prod(self._shape):].reshape((self.P,self.D-1) + self._shape[::-1]).transpose((0,1,3,2))) + ']'
         return ret_str
         
     def __repr__(self):
@@ -178,7 +193,6 @@ def mul(x, y, out = None):
     """ computes z = x * y
     """
     
-    print x._shape
     P,D = x.P, x.D
     M,N = x._shape
     
@@ -189,9 +203,7 @@ def mul(x, y, out = None):
     x.data.ctypes.data_as(c_double_ptr), M)
     
     return out
-    
-    
-    
+
     
 def dot(x,y, out = None):
     """ computes z = dot(x,y) in Taylor arithmetic
