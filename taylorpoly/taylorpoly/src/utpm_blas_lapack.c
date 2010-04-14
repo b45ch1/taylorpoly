@@ -1,5 +1,7 @@
 #include <cblas.h>
 #include <clapack.h>
+#include "lapack.h"
+
 #include <stdio.h>
 
 
