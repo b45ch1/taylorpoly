@@ -1,7 +1,7 @@
 from numpy.testing import TestCase, assert_array_almost_equal, assert_almost_equal, assert_equal
 import numpy
 
-from taylorpoly.utpm import UTPM, solve, add, sub, mul, dot
+from taylorpoly.utpm import UTPM, solve, add, sub, mul, dot, transpose
 
 class test_global_functions(TestCase):
     def test_add(self):
@@ -79,7 +79,15 @@ class Test_UTPM_methods(TestCase):
         
         for d in range(D):
             assert_array_almost_equal(tmp[d], A.coeff[0,d])
+    
+    def test_transpose(self):
+        P,D,N,M = 1,2,3,2
+        x = UTPM(numpy.random.rand((P*(D-1)+1)*M*N), shape = (M,N), P = P)
+        y = transpose(x)
         
+        for p in range(P):
+            for d in range(D):
+                assert_array_almost_equal(x.coeff[p,d].T, y.coeff[p,d])
 
         # print A
         

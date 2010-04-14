@@ -18,6 +18,8 @@ import os
 import ctypes
 import numpy
 
+import utils
+
 _utpm = numpy.ctypeslib.load_library('libutpm.so', os.path.dirname(__file__))
 
 c_double_ptr = ctypes.POINTER(ctypes.c_double)
@@ -68,22 +70,35 @@ class UTPM:
             shp = numpy.shape(data)
             self.D = shp[0]
             self.P = P
-            self._shape = shp[1:]
+            self._shape = numpy.array(shp[1:],dtype=int)
             self.data = numpy.ravel(data.transpose((0,2,1)))
             
         else:
             tmp = numpy.prod(shape)
             D = (numpy.size(data)//tmp-1)//P + 1
             
-            if not isinstance(shape,tuple):
-                shape = (shape,)
-            
-            self._shape = shape
+            self._shape = numpy.array(shape,dtype=int)
             self.D = D
             self.P = P
             self.data = numpy.ravel(data)
+            
+        self._strides = 8*numpy.array([numpy.prod(self._shape[:i]) for i in range(self.ndim)], dtype=int)
         self.coeff = self.Coeff(self)
         
+        
+    def get_ndim(self):
+        return len(self._shape)
+        
+    def get_shape(self):
+        return self._shape
+        
+    def get_strides(self):
+        return self._strides
+        
+    ndim = property(get_ndim)
+    shape = property(get_shape)
+    strides = property(get_strides)
+
     class Coeff:
         """
         helper class for UTPM that allows to extract the array of direction p
@@ -100,14 +115,14 @@ class UTPM:
                 raise ValueError('p is too large')
                 
             if d == 0:
-                return self.x.data[:numpy.prod(self.x._shape)].reshape(self.x._shape[::-1]).T
+                return utils.as_strided(self.x.data[:numpy.prod(self.x._shape)], shape = self.x._shape, strides = self.x._strides)
             
             else:
                 N = numpy.prod(self.x._shape)
                 D = self.x.D
                 start = N + p * N * (D-1) + N*(d-1)
                 stop  = N + p * N * (D-1) + N*d
-                return self.x.data[start:stop].reshape(self.x._shape[::-1]).T
+                return utils.as_strided(self.x.data[start:stop], shape = self.x._shape, strides = self.x._strides)
                 
         def __setitem__(self, sl, value):
             p,d = sl
@@ -130,9 +145,10 @@ class UTPM:
     def __str__(self):
         """ return human readable string representation"""
         ret_str =  '['
-        ret_str += str(self.data[:numpy.prod(self._shape)].reshape(self._shape[::-1]).T) + '],\n'
+        ret_str += str(utils.as_strided(self.data[:numpy.prod(self._shape)], shape = self._shape, strides = self._strides)) + '],\n'
         ret_str += '['
-        ret_str += str(self.data[numpy.prod(self._shape):].reshape((self.P,self.D-1) + self._shape[::-1]).transpose((0,1,3,2))) + ']'
+        s = numpy.prod(self._strides)
+        ret_str += str(utils.as_strided(self.data[numpy.prod(self._shape):], shape = (self.P,self.D-1) + tuple(self._shape), strides = (self.D * s, s) + tuple(self._strides))) + ']'
         return ret_str
         
     def __repr__(self):
@@ -148,10 +164,49 @@ class UTPM:
         return self.__class__(numpy.zeros_like(self.data), shape = self._shape, P = self.P)
 
     def __add__(self, other):
-        return add(self,other)
+        return add(self, other)
         
     def __sub__(self, other):
-        return sub(self,other)
+        return sub(self, other)
+        
+    def __mul__(self, other):
+        return mul(self, other)
+        
+    def dot(self, other):
+        return dot(self, other)
+        
+        
+def view(x):
+    """ returns a copy of the object but no copy of the data"""
+    return x.__class__(x.data, shape = x._shape, P = x.P)
+        
+def transpose(x, axes = None):
+    """Permute the dimensions of an UTPM instance.
+    
+    Parameters
+    ----------
+    x : UTPM instance
+    axes : list of ints, optional
+        By default, reverse the dimensions, otherwise permute the axes
+        according to the values given.
+        
+    How it works
+    ------------
+    x.shape   = x.shape[list(axes)]
+    x.strides = x.strides[list(axes)]
+    """
+    
+    if axes == None:
+        axes = numpy.arange(x.ndim)[::-1]
+        
+    y = view(x)
+    
+    y._shape   = y._shape[list(axes)]
+    y._strides = y._strides[list(axes)]
+        
+    return y
+    
+    
 
 
 def add(x,y, out = None):
