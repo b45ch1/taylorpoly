@@ -32,9 +32,13 @@ _utpm.utpm_imul.argtypes = [c_int, c_int, c_int, c_int, c_double_ptr, c_int, c_d
 
 
 _utpm.utpm_dgemm.argtypes = [c_int, c_int, c_int,  c_int, c_int,  c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int, c_double, c_double_ptr, c_int]
-
+_utpm.utpm_dgemm_residual.argtypes = [c_int, c_int, c_int, c_int,  c_int, c_int,  c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int, c_double, c_double_ptr, c_int]
 _utpm.utpm_daxpy.argtypes = [c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int]
 _utpm.utpm_dgesv.argtypes = [c_int, c_int, c_int, c_int, c_int, c_int, c_double_ptr, c_int, c_int_ptr, c_double_ptr, c_int]
+
+
+
+
 
 
 class UTPM:
@@ -286,6 +290,35 @@ def dot(x,y, out = None):
     
     return out
 
+def dot_residual(p, d, x,y, out = None):
+    """
+    x,y are UTPM instances
+    
+    p, direction
+    d, current degree
+    """
+    
+    if len(x._shape) != 2 or len(y._shape) != 2:
+        raise NotImplementedError('only 2d arrays work right now')
+        
+    P,D,M,K,N = x.P, x.D, x._shape[0], x._shape[1], y._shape[1]
+    
+    if x._shape[1] != y._shape[0]:
+        raise ValueError('shape of x does not match shape of y')
+    
+    if out == None:
+        out = numpy.zeros((M,N), order = 'F' )
+
+    A,B,C = x, y, out
+    order = 102 # column major
+    trans = 111 # no trans
+    lda, ldb, ldc = M, K, M
+        
+    _utpm.utpm_dgemm_residual(p, D, d, order, trans, trans, M, N, K, 1., A.data.ctypes.data_as(c_double_ptr),
+        lda, B.data.ctypes.data_as(c_double_ptr), ldb, 0., C.ctypes.data_as(c_double_ptr), ldc)
+    
+    return out
+
 
 def solve(A,B):
     """
@@ -309,3 +342,6 @@ def solve(A,B):
         lda, ipiv.ctypes.data_as(c_int_ptr), B.data.ctypes.data_as(c_double_ptr), ldb)
     
     return B
+
+
+

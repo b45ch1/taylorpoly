@@ -59,12 +59,17 @@ inline int utpm_imul(int P, int D, int M, int N, double *y, int ldy, double *x, 
 }
 
 
+
+
+
+/*
 int utpm_qr(int P, int D, int M, int N, double *A, int ldA, double *Q, int ldQ, double *R, int ldR){
     
     // void lapack_dgeqrf(const int m, const int n, double * a, const int lda, double * tau, double * work, const int lwork, int * info );
 
+    
 }
-
+*/
 
 
 

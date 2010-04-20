@@ -15,10 +15,7 @@ are necessary to do real computational work.
 
 
 
-#include "lapack.h"
 
-#include <cblas.h>
-#include <clapack.h>
 
 #include <stdio.h>
 
@@ -45,7 +42,65 @@ int utpm_daxpy(int P, int D, int N, double alpha, double *x,
     return 0;
 }
 
-int utpm_dgemm(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
+int utpm_dgemm_residual(int p, int D, int d, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
+                 enum CBLAS_TRANSPOSE TransB, int M, int N,
+                 int K, double alpha, double *A,
+                 int lda, double *B, int ldb,
+                 double beta, double *C, int ldc){
+
+    /* Helper function to compute residuals of the form 
+    \Delta F t^d =_{d+1} [Q^T]_d [Q]_d - Id
+    
+    for given p and d.
+    
+    computes:
+    C = alpha \sum_{k=1}^{d-1} A_{d-k} B_k + beta C
+    
+    dimensions:
+    -----------
+    A_d is a (M,K) matrix
+    B_d is a (K,N) matrix  for d = 0,...,D-1
+    C is a (M,N) matrix
+    
+    See http://www.netlib.org/blas/dgemm.f for documentation.
+    
+    */
+    
+    int k;
+    double *Ad, *Bd;
+    double *Ap, *Bp;
+    
+    int pstrideA, pstrideB;
+    int dstrideA, dstrideB;
+    
+    /* input checks */
+    if(TransA != 111 || TransB != 111 || Order != 102){
+        printf("The case TransA != 111 || TransB != 111 || Order != 101 has not been implemented yet!\n");
+        return -1;
+    }
+
+    /* d > 0: higher order coefficients */
+    dstrideA = lda*K; dstrideB = ldb*N; 
+    pstrideA = (D-1)*dstrideA; pstrideB = (D-1)*dstrideB;
+    
+    Ap = A + p*pstrideA;
+    Bp = B + p*pstrideB;
+        
+    /* compute sum_{k=1}^{d-1} x_k y_{d-k} */
+    Ad = Ap + dstrideA;
+    Bd = Bp + (d - 1) * dstrideB;
+    for(k = 1; k < d; ++k){
+        cblas_dgemm(Order, TransA, TransB, M, N, K, alpha, Ad,
+         lda, Bd, ldb, 1, C, ldc);
+        Ad += dstrideA;
+        Bd -= dstrideB;
+    }
+    return 0;
+}
+    
+    
+
+inline int utpm_dgemm(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  enum CBLAS_TRANSPOSE TransB, int M, int N,
                  int K, double alpha, double *A,
                  int lda, double *B, int ldb,

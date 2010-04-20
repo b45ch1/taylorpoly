@@ -54,4 +54,6 @@ inline int amul(int M, int N, double *x, int ldx, double *y, int ldy, double *z,
     }
 
     return 0;
-} 
+}
+
+
