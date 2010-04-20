@@ -88,7 +88,22 @@ class UTPM:
             
         self._strides = 8*numpy.array([numpy.prod(self._shape[:i]) for i in range(self.ndim)], dtype=int)
         self.coeff = self.Coeff(self)
+    
+    @property
+    def is_transposed(self):
+        return (self.strides[-1] < self.strides[-2])
         
+    def get_cblas_transpose_code(self):
+        if self.is_transposed:
+            return 112
+        else:
+            return 111
+            
+    cblas_transpose_code = property(get_cblas_transpose_code)
+    
+    @property
+    def T(self):
+        return transpose(self)
         
     def get_ndim(self):
         return len(self._shape)
@@ -285,7 +300,7 @@ def dot(x,y, out = None):
     trans = 111 # no trans
     lda, ldb, ldc = M, K, M
         
-    _utpm.utpm_dgemm(P, D, order, trans, trans, M, N, K, 1., A.data.ctypes.data_as(c_double_ptr),
+    _utpm.utpm_dgemm(P, D, order, x.cblas_transpose_code, y.cblas_transpose_code, M, N, K, 1., A.data.ctypes.data_as(c_double_ptr),
         lda, B.data.ctypes.data_as(c_double_ptr), ldb, 0., C.data.ctypes.data_as(c_double_ptr), ldc)
     
     return out
