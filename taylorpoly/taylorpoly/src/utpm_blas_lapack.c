@@ -1,8 +1,28 @@
-#include <cblas.h>
-#include <clapack.h>
+/*
+
+Rationale:
+----------
+
+It turns out that it is a little inconvenient to provide UTPM algorithms of LAPACK and BLAS
+since the API does not match the requirements very well. Also, many algorithms that are necessary are
+completely missing.
+
+The idea is to stay as close to BLAS and LAPACK as possible. The real algorithms in utpm.c may call
+algorithms from this file. Please not that this file only provides a subset of the algorithms that
+are necessary to do real computational work.
+
+*/
+
+
+
 #include "lapack.h"
 
+#include <cblas.h>
+#include <clapack.h>
+
 #include <stdio.h>
+
+#include "utpm_blas_lapack.h"
 
 
 int utpm_dscal(int P, int D, int N, double alpha, double *X, int incX){

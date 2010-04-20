@@ -1,63 +1,9 @@
-inline int imul(int M, int N, double *y, int ldy, double *x, int ldx){
-    /* computes y *= x, where y and x are (M,N) arrays stored in column major format
-    with leading dimensions ldx and ldy.
-    */
-    
-    int n, m;
-    
-    for(n = 0; n < N; ++n){
-        for(m = 0; m < M; ++m){
-            (*y) *=  (*x);
-            ++y; ++x;
-        }
-        y += (ldy - M);
-        x += (ldx - M);
-    }
+/* Algorithms for Univariate Taylor Polynomial over Matrices.
+A matrix is a 2D array.
+*/
 
-    return 0;
-}
-
-inline int idiv(int M, int N, double *y, int ldy, double *x, int ldx){
-    /* computes y /= x, where y and x are (M,N) arrays stored in column major format
-    with leading dimensions ldx and ldy.
-    */
-    
-    int n, m;
-    
-    for(n = 0; n < N; ++n){
-        for(m = 0; m < M; ++m){
-            (*y) /=  (*x);
-            ++y; ++x;
-        }
-        y += (ldy - M);
-        x += (ldx - M);
-    }
-
-    return 0;
-}
-
-inline int amul(int M, int N, double *x, int ldx, double *y, int ldy, double *z, int ldz){
-    /* computes z = z + x * y, where y and x are (M,N) arrays stored in column major format
-    with leading dimensions ldx and ldy.
-    */
-    
-    int n, m;
-    
-    for(n = 0; n < N; ++n){
-        for(m = 0; m < M; ++m){
-            (*z) += (*y) * (*x);
-            ++x; ++y; ++z;
-        }
-        x += (ldx - M);
-        y += (ldy - M);
-        z += (ldz - M);
-    }
-
-    return 0;
-}
-
-
-
+#include "utpm_helper_functions.h"
+#include "utpm_blas_lapack.h"
 
 inline int utpm_imul(int P, int D, int M, int N, double *y, int ldy, double *x, int ldx){
     
@@ -110,7 +56,13 @@ inline int utpm_imul(int P, int D, int M, int N, double *y, int ldy, double *x, 
     imul(M, N, yd, ldy, xd, ldx);
     
     return 0;
+}
+
+
+int utpm_qr(int P, int D, int M, int N, double *A, int ldA, double *Q, int ldQ, double *R, int ldR){
     
+    // void lapack_dgeqrf(const int m, const int n, double * a, const int lda, double * tau, double * work, const int lwork, int * info );
+
 }
 
 
