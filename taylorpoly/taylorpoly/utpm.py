@@ -37,7 +37,12 @@ _utpm.utpm_daxpy.argtypes = [c_int, c_int, c_int, c_double, c_double_ptr, c_int,
 _utpm.utpm_dgesv.argtypes = [c_int, c_int, c_int, c_int, c_int, c_int, c_double_ptr, c_int, c_int_ptr, c_double_ptr, c_int]
 
 
+_utpm.utpm_dot.argtypes = [c_int, c_int, c_int, c_int, c_int, c_double, c_double_ptr,
+c_int_ptr, c_double_ptr, c_int_ptr, c_double, c_double_ptr, c_int_ptr]
 
+# (int P, int D, int M, int N, int K, double alpha, double *A,
+#                  int *Astrides, double *B, int *Bstrides,
+#                  double beta, double *C, int *Cstrides)
 
 
 
@@ -86,6 +91,7 @@ class UTPM:
             self.P = P
             self.data = numpy.ravel(data)
             
+        self._Dstride = 8*numpy.prod(self._shape)
         self._strides = 8*numpy.array([numpy.prod(self._shape[:i]) for i in range(self.ndim)], dtype=int)
         self.coeff = self.Coeff(self)
     
@@ -106,7 +112,7 @@ class UTPM:
             return self._strides[-2] // 8
         else:
             return self._strides[-1] // 8
-    
+               
     @property
     def T(self):
         return transpose(self)
@@ -317,6 +323,47 @@ def dot(x,y, out = None):
         lda, B.data.ctypes.data_as(c_double_ptr), ldb, 0., C.data.ctypes.data_as(c_double_ptr), ldc)
     
     return out
+    
+def dot2(x,y, out = None):
+    """ computes z = dot(x,y) in Taylor arithmetic
+
+    """
+    
+    if len(x._shape) != 2 or len(y._shape) != 2:
+        raise NotImplementedError('only 2d arrays work right now')
+        
+    if id(x) == id(y):
+        raise ValueError('x and y may not be the same')
+        
+    P,D,M,K,N = x.P, x.D, x._shape[0], x._shape[1], y._shape[1]
+    
+    if x._shape[1] != y._shape[0]:
+        raise ValueError('shape of x does not match shape of y')
+        
+    if out == None:
+        out = UTPM(numpy.zeros(N*M + (D-1) * N*M * P), P=P, shape = (M,N))
+
+    A,B,C = x, y, out
+    
+    Astrides = numpy.concatenate((A.strides, [A._Dstride]))
+    Bstrides = numpy.concatenate((B.strides, [B._Dstride]))
+    Cstrides = numpy.concatenate((C.strides, [C._Dstride]))
+    
+    Astrides = numpy.asarray(Astrides, dtype=ctypes.c_int)
+    Bstrides = numpy.asarray(Bstrides, dtype=ctypes.c_int)
+    Cstrides = numpy.asarray(Cstrides, dtype=ctypes.c_int)
+    
+    # print Astrides, Bstrides, Cstrides
+        
+    _utpm.utpm_dot(P, D, M, N, K, 1.,
+        A.data.ctypes.data_as(c_double_ptr),Astrides.ctypes.data_as(c_int_ptr),
+        B.data.ctypes.data_as(c_double_ptr),Bstrides.ctypes.data_as(c_int_ptr),
+        0,
+        C.data.ctypes.data_as(c_double_ptr),Cstrides.ctypes.data_as(c_int_ptr))
+    
+    return out
+    
+    
 
 def dot_residual(p, d, x,y, out = None):
     """

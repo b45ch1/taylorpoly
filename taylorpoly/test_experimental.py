@@ -7,5 +7,3 @@ from taylorpoly.utils import *
 
 
 
-
-
