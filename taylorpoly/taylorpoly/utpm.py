@@ -92,14 +92,20 @@ class UTPM:
     @property
     def is_transposed(self):
         return (self.strides[-1] < self.strides[-2])
-        
-    def get_cblas_transpose_code(self):
+    
+    @property
+    def cblas_transpose_code(self):
         if self.is_transposed:
             return 112
         else:
             return 111
             
-    cblas_transpose_code = property(get_cblas_transpose_code)
+    @property
+    def cblas_leadim(self):
+        if self.is_transposed == True:
+            return self._strides[-2] // 8
+        else:
+            return self._strides[-1] // 8
     
     @property
     def T(self):
@@ -292,13 +298,20 @@ def dot(x,y, out = None):
         
     P,D,M,K,N = x.P, x.D, x._shape[0], x._shape[1], y._shape[1]
     
+    if x._shape[1] != y._shape[0]:
+        raise ValueError('shape of x does not match shape of y')
+        
     if out == None:
         out = UTPM(numpy.zeros(N*M + (D-1) * N*M * P), P=P, shape = (M,N))
+        
+        
+    print 'cblas_transpose_code= ',x.cblas_transpose_code, y.cblas_transpose_code
 
     A,B,C = x, y, out
     order = 102 # column major
-    trans = 111 # no trans
-    lda, ldb, ldc = M, K, M
+    lda, ldb, ldc = x.cblas_leadim, y.cblas_leadim, M
+    
+    print lda,ldb
         
     _utpm.utpm_dgemm(P, D, order, x.cblas_transpose_code, y.cblas_transpose_code, M, N, K, 1., A.data.ctypes.data_as(c_double_ptr),
         lda, B.data.ctypes.data_as(c_double_ptr), ldb, 0., C.data.ctypes.data_as(c_double_ptr), ldc)
