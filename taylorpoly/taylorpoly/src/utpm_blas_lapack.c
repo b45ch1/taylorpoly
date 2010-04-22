@@ -269,7 +269,8 @@ int utpm_dgesv(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA
             clapack_dgetrs(Order, TransA, N, NRHS, A, lda, ipiv, Bd, ldb);
         }
     }
-
     
     return 0;
-} 
+}
+
+

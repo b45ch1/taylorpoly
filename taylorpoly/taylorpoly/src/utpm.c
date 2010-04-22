@@ -221,21 +221,46 @@ int utpm_solve(int P, int D, int N, int NRHS, int *ipiv, double *A, int *Astride
             clapack_dgetrs(Order, TransA, N, NRHS, A, lda, ipiv, Bd, ldb);
         }
     }
-
-    
     return 0;
 }
 
-
-/*
-int utpm_qr(int P, int D, int M, int N, double *A, int ldA, double *Q, int ldQ, double *R, int ldR){
+int utpm_lu(int P, int D, int N, int *ipiv, double *A, int *Astrides, double *work){
+  
+    int d,p,k;
+    int dstrideA, pstrideA;
+    double *Ad, *Ld, *Ud;
+    double *Ap;
+    int lda, TransA;
+    int Order;
     
-    // void lapack_dgeqrf(const int m, const int n, double * a, const int lda, double * tau, double * work, const int lwork, int * info );
-
+    /* prepare stuff for the lapack call */
+    Order = CblasColMajor;
+    get_leadim_and_cblas_transpose(N, N, Astrides, &lda, &TransA);
+    dstrideA = Astrides[0]/sizeof(double);
+    pstrideA = (D-1)*dstrideA;
     
+    /* compute d = 0 */
+    /* first A = P L U, i.e. LU with partial pivoting */
+    clapack_dgetrf(Order, N, N, A, lda, ipiv);
+    
+    /* compute higher order coefficients d > 0 */
+
+    for( p = 0; p < P; ++p){
+        Ap = A + p*pstrideA;
+        for( d = 1; d < D; ++d){
+            
+            /* compute Delta F = A_d - \sum_{k=1}^d A_k B_{d-k} */
+            for(k=1; k < d; ++k){
+                Ld = Ap + k * dstrideA;
+                Ud = Ap + (d-k) * dstrideA;
+                cblas_dtrmm(Order, CblasLeft, CblasLower, CblasNoTrans, CblasUnit,
+                            N, N, -1., Ld, lda, Ud, lda);
+            }
+        }
+    }
+    
+    
+    return 0;
 }
-*/
-
-
 
 
