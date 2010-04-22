@@ -1,7 +1,7 @@
 from numpy.testing import TestCase, assert_array_almost_equal, assert_almost_equal, assert_equal
 import numpy
 
-from taylorpoly.utpm import UTPM, solve, add, sub, mul, dot, transpose, dot_residual
+from taylorpoly.utpm import *
 
 class test_global_functions(TestCase):
     def test_add(self):
@@ -90,12 +90,16 @@ class test_global_functions(TestCase):
                 assert_array_almost_equal(tmp, dot_residual(p, d, x,y))
 
     def test_solve(self):
-        P,D,N,M = 3,3,6,3
+        P,D,N,M = 3,3,10,20
+        
         A = UTPM(numpy.random.rand((P*(D-1)+1)*N*N), shape = (N,N), P = P)
         b = UTPM(numpy.random.rand((P*(D-1)+1)*N*M), shape = (N,M), P = P)
+        x, LU, ipiv = solve2(A,b, fulloutput = True)
+        assert_array_almost_equal(dot(A,x).data,b.data)
         
-        x = solve(A,b)
-        
+        A = UTPM(numpy.random.rand((P*(D-1)+1)*N*N), shape = (N,N), P = P).T
+        b = UTPM(numpy.random.rand((P*(D-1)+1)*N*M), shape = (N,M), P = P)
+        x, LU, ipiv = solve2(A,b, fulloutput = True)
         assert_array_almost_equal(dot(A,x).data,b.data)
         
 
@@ -127,6 +131,17 @@ class Test_UTPM_methods(TestCase):
         for p in range(P):
             for d in range(D):
                 assert_array_almost_equal(x.coeff[p,d].T, y.coeff[p,d])
+
+    def test_copy(self):
+        P,D,N,M = 3,3,10,20
+        A = UTPM(numpy.random.rand((P*(D-1)+1)*N*N), shape = (N,N), P = P).T
+        
+        
+        A2 = A.copy()
+        
+        assert_equal(A.allstrides, A2.allstrides)
+        assert_array_almost_equal(A.data, A2.data)
+
 
         # print A
         

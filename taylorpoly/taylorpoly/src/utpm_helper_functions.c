@@ -74,7 +74,7 @@ inline int get_leadim_and_cblas_transpose(int M, int N, int *strides, int *leadi
     int is_transposed;
     is_transposed = (strides[2] < strides[1]);
     
-    // printf("strides[1] = %d, strides[0] = %d, is_transposed = %d\n",strides[1],strides[0], is_transposed);
+    // printf("strides[2] = %d, strides[1] = %d, is_transposed = %d\n",strides[2],strides[1], is_transposed);
     
     if (is_transposed) *trans = CblasTrans;
     else *trans = CblasNoTrans;

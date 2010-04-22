@@ -52,7 +52,7 @@ class UTPM:
     where R[[t]] are the formal power series over the field of real numbers R.
     """
     
-    def __init__(self, data, shape = (), P = 1):
+    def __init__(self, data, shape = (), P = 1, allstrides = None):
         """
         data = [x_0, x_{1,1}, x_{1,2}, ..., x_{1,P}, ..., x_{P,D-1}]
         is a flat, contiguous array of
@@ -92,6 +92,11 @@ class UTPM:
             
         self._Dstride = 8*numpy.prod(self._shape)
         self._strides = 8*numpy.array([numpy.prod(self._shape[:i]) for i in range(self.ndim)], dtype=int)
+        
+        if allstrides != None:
+            self._Dstride = allstrides[0]
+            self._strides = allstrides[1:].copy()
+        
         self.coeff = self.Coeff(self)
     
     @property
@@ -180,9 +185,7 @@ class UTPM:
         """ return human readable string representation"""
         ret_str =  '['
         ret_str += str(utils.as_strided(self.data[:numpy.prod(self._shape)], shape = self._shape, strides = self._strides)) + '],\n'
-        ret_str += '['
-        s = numpy.prod(self._strides)
-        ret_str += str(utils.as_strided(self.data[numpy.prod(self._shape):], shape = (self.P,self.D-1) + tuple(self._shape), strides = (self._Dstride, s) + tuple(self._strides))) + ']'
+        ret_str += '['+ str(self.data[numpy.prod(self._shape):]) + ']'
         return ret_str
         
     def __repr__(self):
@@ -191,7 +194,7 @@ class UTPM:
 
     def copy(self):
         """ copies all data in self to a new instance """
-        return self.__class__(self.data.copy(), shape = self._shape, P = self.P)
+        return self.__class__(self.data.copy(), shape = self._shape, P = self.P, allstrides = self.allstrides)
         
     def __zeros_like__(self):
         """ returns a copy of self with all elements set to zero"""
@@ -433,6 +436,8 @@ def solve2(A,B, fulloutput = False):
     Bstrides = B.allstrides
     
     ipiv = numpy.zeros(N,dtype=ctypes.c_int)
+    
+    # print 'Astrides = ', Astrides
     
     _utpm.utpm_solve(P, D, N, NRHS, ipiv.ctypes.data_as(c_int_ptr),
         A.data.ctypes.data_as(c_double_ptr), Astrides.ctypes.data_as(c_int_ptr),
