@@ -94,12 +94,12 @@ class test_global_functions(TestCase):
         
         A = UTPM(numpy.random.rand((P*(D-1)+1)*N*N), shape = (N,N), P = P)
         b = UTPM(numpy.random.rand((P*(D-1)+1)*N*M), shape = (N,M), P = P)
-        x, LU, ipiv = solve2(A,b, fulloutput = True)
+        x, LU, ipiv = solve(A,b, fulloutput = True)
         assert_array_almost_equal(dot(A,x).data,b.data)
         
         A = UTPM(numpy.random.rand((P*(D-1)+1)*N*N), shape = (N,N), P = P).T
         b = UTPM(numpy.random.rand((P*(D-1)+1)*N*M), shape = (N,M), P = P)
-        x, LU, ipiv = solve2(A,b, fulloutput = True)
+        x, LU, ipiv = solve(A,b, fulloutput = True)
         assert_array_almost_equal(dot(A,x).data,b.data)
         
 

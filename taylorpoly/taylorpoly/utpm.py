@@ -395,31 +395,31 @@ def dot_residual(p, d, x,y, out = None):
     return out
 
 
-def solve(A,B):
-    """
-    solves A X = B in Taylor arithmetic
-    """
+# def solve(A,B):
+#     """
+#     solves A X = B in Taylor arithmetic
+#     """
     
-    A = A.copy()
-    B = B.copy()
+#     A = A.copy()
+#     B = B.copy()
     
-    P,D = A.P,A.D
-    order = 102 # col major 102 # row major 101
-    trans = 111 # no trans
+#     P,D = A.P,A.D
+#     order = 102 # col major 102 # row major 101
+#     trans = 111 # no trans
     
-    N = A._shape[0]
-    NRHS = B._shape[1]
-    lda = N
-    ipiv = numpy.zeros(N,dtype=int)
-    ldb = N
+#     N = A._shape[0]
+#     NRHS = B._shape[1]
+#     lda = N
+#     ipiv = numpy.zeros(N,dtype=int)
+#     ldb = N
 
-    _utpm.utpm_dgesv(P,D, order,trans, N, NRHS, A.data.ctypes.data_as(c_double_ptr),
-        lda, ipiv.ctypes.data_as(c_int_ptr), B.data.ctypes.data_as(c_double_ptr), ldb)
+#     _utpm.utpm_dgesv(P,D, order,trans, N, NRHS, A.data.ctypes.data_as(c_double_ptr),
+#         lda, ipiv.ctypes.data_as(c_int_ptr), B.data.ctypes.data_as(c_double_ptr), ldb)
     
-    return B
+#     return B
 
 
-def solve2(A,B, fulloutput = False):
+def solve(A,B, fulloutput = False):
     """
     solves A X = B in Taylor arithmetic
     """
