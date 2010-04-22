@@ -13,13 +13,18 @@ B = lu(A)
 
 # print B.coeff[0,0]
 P,L,U = linalg.lu(A.coeff[0,0])
-
 C = numpy.dot(P,A.coeff[0,0])
-C2 = numpy.dot(P,A.coeff[0,1])
 
-print C - numpy.dot(L,U)
 
-print numpy.dot(L,U)
+A = numpy.zeros((3,3))
+
+l_times_u(1, A,L,U)
+
+# C2 = numpy.dot(P,A.coeff[0,1])
+
+# print C - numpy.dot(L,U)
+
+# print numpy.dot(L,U)
 
 
 

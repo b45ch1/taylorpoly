@@ -32,7 +32,6 @@ _utpm.utpm_imul.argtypes = [c_int, c_int, c_int, c_int, c_double_ptr, c_int, c_d
 
 
 _utpm.utpm_dgemm.argtypes = [c_int, c_int, c_int,  c_int, c_int,  c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int, c_double, c_double_ptr, c_int]
-_utpm.utpm_dgemm_residual.argtypes = [c_int, c_int, c_int, c_int,  c_int, c_int,  c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int, c_double, c_double_ptr, c_int]
 _utpm.utpm_daxpy.argtypes = [c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int]
 _utpm.utpm_dgesv.argtypes = [c_int, c_int, c_int, c_int, c_int, c_int, c_double_ptr, c_int, c_int_ptr, c_double_ptr, c_int]
 
@@ -40,8 +39,10 @@ _utpm.utpm_dgesv.argtypes = [c_int, c_int, c_int, c_int, c_int, c_int, c_double_
 _utpm.utpm_dot.argtypes = [c_int, c_int, c_int, c_int, c_int, c_double, c_double_ptr, c_int_ptr, c_double_ptr, c_int_ptr, c_double, c_double_ptr, c_int_ptr]
 _utpm.utpm_solve.argtypes = [c_int, c_int, c_int, c_int, c_int_ptr, c_double_ptr, c_int_ptr, c_double_ptr, c_int_ptr]
 _utpm.utpm_lu.argtypes = [c_int, c_int, c_int,  c_int_ptr, c_double_ptr, c_int_ptr, c_double_ptr]
-# _utpm.utpm_lu(P,D,N,ipiv,A,Astrides)
 
+# helper functions
+_utpm.utpm_dgemm_residual.argtypes = [c_int, c_int, c_int, c_int,  c_int, c_int,  c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int, c_double, c_double_ptr, c_int]
+_utpm.l_times_u.argtypes = [c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int, c_double_ptr, c_int]
 
 class UTPM:
     """
@@ -391,6 +392,8 @@ def dot_residual(p, d, x,y, out = None):
         lda, B.data.ctypes.data_as(c_double_ptr), ldb, 0., C.ctypes.data_as(c_double_ptr), ldc)
     
     return out
+    
+
 
 
 # def solve(A,B):
@@ -462,4 +465,13 @@ def lu(A):
         A.data.ctypes.data_as(c_double_ptr), Astrides.ctypes.data_as(c_int_ptr), work.ctypes.data_as(c_double_ptr))
      
     return A
+
+def l_times_u(alpha, A,L,U):
+    """ computes A := A + alpha * L * U, where L lower triangular and U upper triangular"""
+    N = A.shape[0]
+    
+    # _utpm.l_times_u(N, alpha,
+    #     A.ctypes.data_as(c_double_ptr), A.cblas_leadim, 
+    #     L.ctypes.data_as(c_double_ptr), L.cblas_leadim, 
+    #     U.ctypes.data_as(c_double_ptr), U.cblas_leadim)
 

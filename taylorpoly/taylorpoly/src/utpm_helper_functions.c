@@ -84,4 +84,37 @@ inline int get_leadim_and_cblas_transpose(int M, int N, int *strides, int *leadi
     return 0;
 }
 
+inline int l_times_u(int N, double alpha, double *A, int lda, double *B, int ldb, double *C, int ldc){
+    /* 
+    computes A := A + alpha * L * U,
+    where L lower triangular matrix and U upper triangular matrix
+    
+    (inefficient) helper function that implements functionality missing in BLAS
+    
+    */
+    int m,n,i;
+    int itmp;
+    double dtmp;
+    double *Ai, *Bi, *Ci;
+    
+    Ai = A;
+    for(m = 0; m < N; ++m){
+        for(n = 0; n < N; ++n){
+            itmp = (m <= n ? m : n);
+            dtmp = 0;
+            Bi = B + m + n*ldb;
+            Ci = C + n*ldc;
+            for(i = 0; i <= itmp; ++i){
+                dtmp += alpha * (*Bi) * (*Ci);
+                Bi += ldb;
+                ++Ci;
+            }
+            (*Ai) += dtmp;
+            ++Ai;
+        }
+        Ai += (lda - N);
+    }
+    return 0;
+}
+
 

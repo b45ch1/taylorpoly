@@ -227,11 +227,15 @@ int utpm_solve(int P, int D, int N, int NRHS, int *ipiv, double *A, int *Astride
 int utpm_lu(int P, int D, int N, int *ipiv, double *A, int *Astrides, double *work){
   
     int d,p,k;
+    int m,n,j;
     int dstrideA, pstrideA;
     double *Ad, *Ld, *Ud;
     double *Ap;
     int lda, TransA;
     int Order;
+    
+    int itmp;
+    double dtmp;
     
     /* prepare stuff for the lapack call */
     Order = CblasColMajor;
@@ -253,9 +257,12 @@ int utpm_lu(int P, int D, int N, int *ipiv, double *A, int *Astrides, double *wo
             for(k=1; k < d; ++k){
                 Ld = Ap + k * dstrideA;
                 Ud = Ap + (d-k) * dstrideA;
-                cblas_dtrmm(Order, CblasLeft, CblasLower, CblasNoTrans, CblasUnit,
-                            N, N, -1., Ld, lda, Ud, lda);
+                Ad = Ap + d * dstrideA;
+                
+
+
             }
+            // lapack_dtrtrs(lapack_lower, lapack_no_trans, lapack_unit_diag, N, N, const double * a, const int lda, double * b, const int ldb, int * info );
         }
     }
     
