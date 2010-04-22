@@ -40,10 +40,9 @@ _utpm.utpm_dgesv.argtypes = [c_int, c_int, c_int, c_int, c_int, c_int, c_double_
 _utpm.utpm_dot.argtypes = [c_int, c_int, c_int, c_int, c_int, c_double, c_double_ptr,
 c_int_ptr, c_double_ptr, c_int_ptr, c_double, c_double_ptr, c_int_ptr]
 
-# (int P, int D, int M, int N, int K, double alpha, double *A,
-#                  int *Astrides, double *B, int *Bstrides,
-#                  double beta, double *C, int *Cstrides)
-
+_utpm.utpm_solve.argtypes = [c_int, c_int, c_int, c_int, c_int_ptr, c_double_ptr, c_int_ptr, c_double_ptr, c_int_ptr]
+# int utpm_solve(int P, int D, int N, int NRHS, int *ipiv, double *A, int *Astrides,
+#                   double *B, int *Bstrides)
 
 
 class UTPM:
@@ -183,7 +182,7 @@ class UTPM:
         ret_str += str(utils.as_strided(self.data[:numpy.prod(self._shape)], shape = self._shape, strides = self._strides)) + '],\n'
         ret_str += '['
         s = numpy.prod(self._strides)
-        ret_str += str(utils.as_strided(self.data[numpy.prod(self._shape):], shape = (self.P,self.D-1) + tuple(self._shape), strides = (self.D * s, s) + tuple(self._strides))) + ']'
+        ret_str += str(utils.as_strided(self.data[numpy.prod(self._shape):], shape = (self.P,self.D-1) + tuple(self._shape), strides = (self._Dstride, s) + tuple(self._strides))) + ']'
         return ret_str
         
     def __repr__(self):
@@ -417,4 +416,34 @@ def solve(A,B):
     return B
 
 
-
+def solve2(A,B, fulloutput = False):
+    """
+    solves A X = B in Taylor arithmetic
+    """
+    
+    A = A.copy()
+    B = B.copy()
+    
+    P,D = A.P,A.D
+    
+    N = A._shape[0]
+    NRHS = B._shape[1]
+    
+    Astrides = A.allstrides
+    Bstrides = B.allstrides
+    
+    ipiv = numpy.zeros(N,dtype=ctypes.c_int)
+    
+    _utpm.utpm_solve(P, D, N, NRHS, ipiv.ctypes.data_as(c_int_ptr),
+        A.data.ctypes.data_as(c_double_ptr), Astrides.ctypes.data_as(c_int_ptr),
+        B.data.ctypes.data_as(c_double_ptr), Bstrides.ctypes.data_as(c_int_ptr))
+        
+    if(fulloutput == True):
+        return (B,A,ipiv)
+    else:
+        return B
+    
+    
+    
+    
+    

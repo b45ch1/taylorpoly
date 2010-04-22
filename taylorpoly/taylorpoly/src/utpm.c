@@ -61,9 +61,6 @@ inline int utpm_imul(int P, int D, int M, int N, double *y, int ldy, double *x, 
     return 0;
 }
 
-
-
-
 int utpm_dot(int P, int D, int M, int N, int K, double alpha, double *A,
                  int *Astrides, double *B, int *Bstrides,
                  double beta, double *C, int *Cstrides){
@@ -154,6 +151,79 @@ int utpm_dot(int P, int D, int M, int N, int K, double alpha, double *A,
                              lda, B, ldb, 1, C, ldc);
     return 0;
     
+}
+
+
+int utpm_solve(int P, int D, int N, int NRHS, int *ipiv, double *A, int *Astrides,
+                  double *B, int *Bstrides){
+    /*
+    Solves the linear system op(A) X = B in Taylor arithmetic,
+    
+    where op(A) = A or op(A) = A**T
+    
+    A (N,N) matrix.
+    B (N,NRHS) matrix
+    
+    This is a modification of the API of dgesv.f: added possiblity enum CBLAS_TRANSPOSE TransA
+    to the function argument list.Compare to http://www.netlib.org/lapack/double/dgesv.f.
+    
+    The solution is computed by:
+    1) clapack_dgetrf (see http://www.netlib.org/lapack/double/dgetrf.f)
+    2) clapack_dgetrs (see http://www.netlib.org/lapack/double/dgetrs.f)
+
+    */
+    
+    int d,p,k;
+    int dstrideA, dstrideB, pstrideA, pstrideB;
+    double *Ad, *Bd;
+    double *Ap, *Bp;
+    
+    int lda, ldb, TransA, TransB;
+    int Order;
+    
+    /* prepare stuff for the lapack call */
+    Order = CblasColMajor;
+    get_leadim_and_cblas_transpose(N, N, Astrides, &lda, &TransA);
+    get_leadim_and_cblas_transpose(N, NRHS, Bstrides, &ldb, &TransB);
+    
+    /* compute d = 0 */
+    /* first A = P L U, i.e. LU with partial pivoting */
+    
+    clapack_dgetrf(Order, N, N, A, lda, ipiv);
+    clapack_dgetrs(Order, TransA, N, NRHS, A, lda, ipiv, B, ldb);
+    /* clapack_dgesv(Order, N, NRHS, A, lda, ipiv, B, ldb); */
+    
+    /* compute higher order coefficients d > 0 */
+    dstrideA = lda*N; dstrideB = ldb*NRHS;
+    pstrideA = dstrideA*(D-1); pstrideB = dstrideB*(D-1);
+    
+    for( p = 0; p < P; ++p){
+        Ap = A + p*pstrideA;
+        Bp = B + p*pstrideB;
+        for( d = 1; d < D; ++d){
+            /* compute B_d - \sum_{k=1}^d A_k B_{d-k} */
+            for(k=1; k < d; ++k){
+                Ad = Ap + k * dstrideA;
+                Bd = Bp + (d-k) * dstrideB;
+                /* FIXME: why the hell is now ldb = NRHS??? */
+                cblas_dgemm(Order, TransA, CblasNoTrans, N, NRHS,
+                     N, -1., Ad, lda, Bd, ldb, 1., Bp + d*dstrideB, ldb);
+            }
+            
+            /* compute the last loop element, i.e. k = d */
+            Ad = Ap + d*dstrideA;   Bd = Bp + d*dstrideB;
+            
+            cblas_dgemm(Order, TransA, CblasNoTrans, N, NRHS,
+                 N, -1., Ad, lda, B, ldb, 1., Bd, ldb);
+            
+            /* compute solve(A_0,  B_d - \sum_{k=1}^d A_k B_{d-k}
+               where A_0 is LU factorized already            */
+            clapack_dgetrs(Order, TransA, N, NRHS, A, lda, ipiv, Bd, ldb);
+        }
+    }
+
+    
+    return 0;
 }
 
 
