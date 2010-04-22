@@ -61,31 +61,7 @@ inline int utpm_imul(int P, int D, int M, int N, double *y, int ldy, double *x, 
     return 0;
 }
 
-inline int get_leadim_and_cblas_transpose(int M, int N, int *strides, int *leadim, int *trans){
-    /* 
-    INPUTS:
-    
-        M              number of rows of the matrix
-        N              number of cols of the matrix
-        strides        int array of size 3, used as in numpy
-    
-    OUTPUTS:
-    
-        leadim is the leading dimension as blas and lapack require it
-        trans indicates if the strides specify an actually transposed matrix
-    */
-    int is_transposed;
-    is_transposed = (strides[1] < strides[0]);
-    
-    // printf("strides[1] = %d, strides[0] = %d, is_transposed = %d\n",strides[1],strides[0], is_transposed);
-    
-    if (is_transposed) *trans = CblasTrans;
-    else *trans = CblasNoTrans;
-    
-    if (!is_transposed) *leadim = strides[1]/sizeof(double);
-    else *leadim = N;
-    return 0;
-}
+
 
 
 int utpm_dot(int P, int D, int M, int N, int K, double alpha, double *A,
@@ -125,9 +101,9 @@ int utpm_dot(int P, int D, int M, int N, int K, double alpha, double *A,
 
     /* d > 0: higher order coefficients */
     Order = CblasColMajor;
-    dstrideA = Astrides[2]/sizeof(double);
-    dstrideB = Bstrides[2]/sizeof(double);
-    dstrideC = Cstrides[2]/sizeof(double);
+    dstrideA = Astrides[0]/sizeof(double);
+    dstrideB = Bstrides[0]/sizeof(double);
+    dstrideC = Cstrides[0]/sizeof(double);
     
     get_leadim_and_cblas_transpose(M, K, Astrides, &lda, &TransA);
     get_leadim_and_cblas_transpose(K, N, Bstrides, &ldb, &TransB);

@@ -1,7 +1,7 @@
 from numpy.testing import TestCase, assert_array_almost_equal, assert_almost_equal, assert_equal
 import numpy
 
-from taylorpoly.utpm import UTPM, solve, add, sub, mul, dot, transpose, dot_residual, dot2
+from taylorpoly.utpm import UTPM, solve, add, sub, mul, dot, transpose, dot_residual
 
 class test_global_functions(TestCase):
     def test_add(self):
@@ -35,37 +35,14 @@ class test_global_functions(TestCase):
             assert_array_almost_equal( z.coeff[p,0], x.coeff[p,0] * y.coeff[p,0])
             assert_array_almost_equal( z.coeff[p,1],  x.coeff[p,0] * y.coeff[p,1] + x.coeff[p,1] * y.coeff[p,0])
             assert_array_almost_equal( z.coeff[p,2],  x.coeff[p,0] * y.coeff[p,2] + x.coeff[p,1] * y.coeff[p,1] + x.coeff[p,2] * y.coeff[p,0])
-        
-        
+
 
     def test_dot(self):
         P,D,M,K,N = 3,2,5,2,3
         x = UTPM(numpy.random.rand(P,D,M,K), shape = (M,K), P = P)
         y = UTPM(numpy.random.rand(P,D,K,N), shape = (K,N), P = P)
-        
-        z = dot(x,y)
-        
-        assert_array_almost_equal(z.coeff[0,0], numpy.dot(x.coeff[0,0], y.coeff[0,0]))
-        for p in range(P):
-            assert_array_almost_equal(z.coeff[p,1], numpy.dot(x.coeff[p,1], y.coeff[p,0]) + numpy.dot(x.coeff[p,0], y.coeff[p,1]))
-    
-    def test_dot_transposed(self):
-        P,D,M,K,N = 3,2,5,2,3
-        x = UTPM(numpy.random.rand(P,D,M,K), shape = (M,K), P = P)
-        y = UTPM(numpy.random.rand(P,D,K,N), shape = (N,K), P = P).T
-        
-        z = dot(x,y)
-        
-        assert_array_almost_equal(z.coeff[0,0], numpy.dot(x.coeff[0,0], y.coeff[0,0]))
-        for p in range(P):
-            assert_array_almost_equal(z.coeff[p,1], numpy.dot(x.coeff[p,1], y.coeff[p,0]) + numpy.dot(x.coeff[p,0], y.coeff[p,1]))
-
-    def test_dot2(self):
-        P,D,M,K,N = 3,2,5,2,3
-        x = UTPM(numpy.random.rand(P,D,M,K), shape = (M,K), P = P)
-        y = UTPM(numpy.random.rand(P,D,K,N), shape = (K,N), P = P)
                                      
-        z = dot2(x,y)
+        z = dot(x,y)
         
         assert_array_almost_equal(z.coeff[0,0], numpy.dot(x.coeff[0,0], y.coeff[0,0]))
         for p in range(P):
@@ -75,7 +52,7 @@ class test_global_functions(TestCase):
         x = UTPM(numpy.random.rand(P,D,M,K), shape = (M,K), P = P)
         y = UTPM(numpy.random.rand(P,D,K,N), shape = (N,K), P = P).T
         
-        z = dot2(x,y)
+        z = dot(x,y)
         
         assert_array_almost_equal(z.coeff[0,0], numpy.dot(x.coeff[0,0], y.coeff[0,0]))
         for p in range(P):
@@ -84,7 +61,7 @@ class test_global_functions(TestCase):
         x = UTPM(numpy.random.rand(P,D,M,K), shape = (K,M), P = P).T
         y = UTPM(numpy.random.rand(P,D,K,N), shape = (K,N), P = P)
         
-        z = dot2(x,y)
+        z = dot(x,y)
         
         assert_array_almost_equal(z.coeff[0,0], numpy.dot(x.coeff[0,0], y.coeff[0,0]))
         for p in range(P):
@@ -93,7 +70,7 @@ class test_global_functions(TestCase):
         x = UTPM(numpy.random.rand(P,D,M,K), shape = (K,M), P = P).T
         y = UTPM(numpy.random.rand(P,D,K,N), shape = (N,K), P = P).T
         
-        z = dot2(x,y)
+        z = dot(x,y)
         
         assert_array_almost_equal(z.coeff[0,0], numpy.dot(x.coeff[0,0], y.coeff[0,0]))
         for p in range(P):

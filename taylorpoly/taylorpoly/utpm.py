@@ -112,6 +112,10 @@ class UTPM:
             return self._strides[-2] // 8
         else:
             return self._strides[-1] // 8
+            
+    @property
+    def allstrides(self):
+        return numpy.asarray( numpy.concatenate(([self._Dstride], self.strides)), dtype=ctypes.c_int)
                
     @property
     def T(self):
@@ -291,6 +295,39 @@ def mul(x, y, out = None):
     return out
 
     
+# def dot(x,y, out = None):
+#     """ computes z = dot(x,y) in Taylor arithmetic
+
+#     """
+    
+#     if len(x._shape) != 2 or len(y._shape) != 2:
+#         raise NotImplementedError('only 2d arrays work right now')
+        
+#     if id(x) == id(y):
+#         raise ValueError('x and y may not be the same')
+        
+#     P,D,M,K,N = x.P, x.D, x._shape[0], x._shape[1], y._shape[1]
+    
+#     if x._shape[1] != y._shape[0]:
+#         raise ValueError('shape of x does not match shape of y')
+        
+#     if out == None:
+#         out = UTPM(numpy.zeros(N*M + (D-1) * N*M * P), P=P, shape = (M,N))
+        
+        
+#     print 'cblas_transpose_code= ',x.cblas_transpose_code, y.cblas_transpose_code
+
+#     A,B,C = x, y, out
+#     order = 102 # column major
+#     lda, ldb, ldc = x.cblas_leadim, y.cblas_leadim, M
+    
+#     print lda,ldb
+        
+#     _utpm.utpm_dgemm(P, D, order, x.cblas_transpose_code, y.cblas_transpose_code, M, N, K, 1., A.data.ctypes.data_as(c_double_ptr),
+#         lda, B.data.ctypes.data_as(c_double_ptr), ldb, 0., C.data.ctypes.data_as(c_double_ptr), ldc)
+    
+#     return out
+    
 def dot(x,y, out = None):
     """ computes z = dot(x,y) in Taylor arithmetic
 
@@ -309,51 +346,12 @@ def dot(x,y, out = None):
         
     if out == None:
         out = UTPM(numpy.zeros(N*M + (D-1) * N*M * P), P=P, shape = (M,N))
-        
-        
-    print 'cblas_transpose_code= ',x.cblas_transpose_code, y.cblas_transpose_code
-
-    A,B,C = x, y, out
-    order = 102 # column major
-    lda, ldb, ldc = x.cblas_leadim, y.cblas_leadim, M
-    
-    print lda,ldb
-        
-    _utpm.utpm_dgemm(P, D, order, x.cblas_transpose_code, y.cblas_transpose_code, M, N, K, 1., A.data.ctypes.data_as(c_double_ptr),
-        lda, B.data.ctypes.data_as(c_double_ptr), ldb, 0., C.data.ctypes.data_as(c_double_ptr), ldc)
-    
-    return out
-    
-def dot2(x,y, out = None):
-    """ computes z = dot(x,y) in Taylor arithmetic
-
-    """
-    
-    if len(x._shape) != 2 or len(y._shape) != 2:
-        raise NotImplementedError('only 2d arrays work right now')
-        
-    if id(x) == id(y):
-        raise ValueError('x and y may not be the same')
-        
-    P,D,M,K,N = x.P, x.D, x._shape[0], x._shape[1], y._shape[1]
-    
-    if x._shape[1] != y._shape[0]:
-        raise ValueError('shape of x does not match shape of y')
-        
-    if out == None:
-        out = UTPM(numpy.zeros(N*M + (D-1) * N*M * P), P=P, shape = (M,N))
 
     A,B,C = x, y, out
     
-    Astrides = numpy.concatenate((A.strides, [A._Dstride]))
-    Bstrides = numpy.concatenate((B.strides, [B._Dstride]))
-    Cstrides = numpy.concatenate((C.strides, [C._Dstride]))
-    
-    Astrides = numpy.asarray(Astrides, dtype=ctypes.c_int)
-    Bstrides = numpy.asarray(Bstrides, dtype=ctypes.c_int)
-    Cstrides = numpy.asarray(Cstrides, dtype=ctypes.c_int)
-    
-    # print Astrides, Bstrides, Cstrides
+    Astrides = A.allstrides
+    Bstrides = B.allstrides
+    Cstrides = C.allstrides
         
     _utpm.utpm_dot(P, D, M, N, K, 1.,
         A.data.ctypes.data_as(c_double_ptr),Astrides.ctypes.data_as(c_int_ptr),
