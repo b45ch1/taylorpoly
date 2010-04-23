@@ -252,15 +252,12 @@ int utpm_lu(int P, int D, int N, int *ipiv, double *A, int *Astrides, double *wo
     for( p = 0; p < P; ++p){
         Ap = A + p*pstrideA;
         for( d = 1; d < D; ++d){
-            
             /* compute Delta F = A_d - \sum_{k=1}^d A_k B_{d-k} */
+            Ad = Ap + d * dstrideA;
             for(k=1; k < d; ++k){
                 Ld = Ap + k * dstrideA;
                 Ud = Ap + (d-k) * dstrideA;
-                Ad = Ap + d * dstrideA;
-                
-
-
+                l_times_u(N, -1., Ad, lda, Ld, lda, Ud, lda);
             }
             // lapack_dtrtrs(lapack_lower, lapack_no_trans, lapack_unit_diag, N, N, const double * a, const int lda, double * b, const int ldb, int * info );
         }

@@ -9,6 +9,6 @@ inline int amul(int M, int N, double *x, int ldx, double *y, int ldy, double *z,
 
 /* helper functions */
 inline int get_leadim_and_cblas_transpose(int M, int N, int *strides, int *leadim, int *trans);
-
+inline int l_times_u(int N, double alpha, double *A, int lda, double *L, int ldl, double *U, int ldu);
 
 #endif
