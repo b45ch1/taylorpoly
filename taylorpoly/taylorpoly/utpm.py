@@ -449,22 +449,22 @@ def solve(A,B, fulloutput = False):
     else:
         return B
     
-def lu(A):
-    """ computes the LU decomposition, i.e. L U = A in Taylor arithmetic """
-    # _utpm.utpm_solve.argtypes = [c_int, c_int, c_int, c_int, c_int_ptr, c_double_ptr, c_int_ptr, c_double_ptr, c_int_ptr]
+# def lu(A):
+#     """ computes the LU decomposition, i.e. L U = A in Taylor arithmetic """
+#     # _utpm.utpm_solve.argtypes = [c_int, c_int, c_int, c_int, c_int_ptr, c_double_ptr, c_int_ptr, c_double_ptr, c_int_ptr]
 
-    A = A.copy()
-    P,D = A.P,A.D
-    N = A._shape[0]
-    Astrides = A.allstrides
-    ipiv = numpy.zeros(N,dtype=ctypes.c_int)
+#     A = A.copy()
+#     P,D = A.P,A.D
+#     N = A._shape[0]
+#     Astrides = A.allstrides
+#     ipiv = numpy.zeros(N,dtype=ctypes.c_int)
     
-    work = numpy.zeros(12, dtype=ctypes.c_double)
+#     work = numpy.zeros(12, dtype=ctypes.c_double)
     
-    _utpm.utpm_lu(P,D,N,ipiv.ctypes.data_as(c_int_ptr),
-        A.data.ctypes.data_as(c_double_ptr), Astrides.ctypes.data_as(c_int_ptr), work.ctypes.data_as(c_double_ptr))
+#     _utpm.utpm_lu(P,D,N,ipiv.ctypes.data_as(c_int_ptr),
+#         A.data.ctypes.data_as(c_double_ptr), Astrides.ctypes.data_as(c_int_ptr), work.ctypes.data_as(c_double_ptr))
      
-    return A
+#     return A
 
 
 

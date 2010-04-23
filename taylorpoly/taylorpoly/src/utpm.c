@@ -225,6 +225,19 @@ int utpm_solve(int P, int D, int N, int NRHS, int *ipiv, double *A, int *Astride
 }
 
 int utpm_lu(int P, int D, int N, int *ipiv, double *A, int *Astrides, double *work){
+    
+    /* compute A = P * L * U decomposition in Taylor arithmetic.    
+    
+    FIXME:
+    this algorithm is not fully implemented. Reason: Missing functionality of BLAS/LAPACK to treat
+    permuted matrices and triangular matrix operations. 
+    
+    In particular, it is required to have an efficient implementation of:
+    
+    1) \Delta F = LU - P^T A
+    2) U_1 * U_2 resp. L_1 * L_2 where U_1,U_2 upper triangular and L_1,L_2 unit lower triangular
+    
+    */
   
     int d,p,k;
     int m,n,j;
