@@ -466,12 +466,5 @@ def lu(A):
      
     return A
 
-def l_times_u(alpha, A,L,U):
-    """ computes A := A + alpha * L * U, where L lower triangular and U upper triangular"""
-    N = A.shape[0]
-    
-    # _utpm.l_times_u(N, alpha,
-    #     A.ctypes.data_as(c_double_ptr), A.cblas_leadim, 
-    #     L.ctypes.data_as(c_double_ptr), L.cblas_leadim, 
-    #     U.ctypes.data_as(c_double_ptr), U.cblas_leadim)
+
 

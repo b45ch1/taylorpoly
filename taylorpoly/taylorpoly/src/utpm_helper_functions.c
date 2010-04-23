@@ -84,10 +84,10 @@ inline int get_leadim_and_cblas_transpose(int M, int N, int *strides, int *leadi
     return 0;
 }
 
-inline int l_times_u(int N, double alpha, double *A, int lda, double *B, int ldb, double *C, int ldc){
+inline int l_times_u(int N, double alpha, double *A, int lda, double *L, int ldl, double *U, int ldu){
     /* 
     computes A := A + alpha * L * U,
-    where L lower triangular matrix and U upper triangular matrix
+    where L unit lower triangular matrix and U upper triangular matrix
     
     (inefficient) helper function that implements functionality missing in BLAS
     
@@ -95,19 +95,20 @@ inline int l_times_u(int N, double alpha, double *A, int lda, double *B, int ldb
     int m,n,i;
     int itmp;
     double dtmp;
-    double *Ai, *Bi, *Ci;
+    double *Ai, *Li, *Ui;
     
     Ai = A;
-    for(m = 0; m < N; ++m){
-        for(n = 0; n < N; ++n){
+    for(n = 0; n < N; ++n){
+        for(m = 0; m < N; ++m){
             itmp = (m <= n ? m : n);
             dtmp = 0;
-            Bi = B + m + n*ldb;
-            Ci = C + n*ldc;
+            Li = L + m;
+            Ui = U + n*ldu;
             for(i = 0; i <= itmp; ++i){
-                dtmp += alpha * (*Bi) * (*Ci);
-                Bi += ldb;
-                ++Ci;
+                if( i != m) dtmp += alpha * (*Li) * (*Ui);
+                else dtmp += alpha * (*Ui);
+                Li += ldl;
+                ++Ui;
             }
             (*Ai) += dtmp;
             ++Ai;
