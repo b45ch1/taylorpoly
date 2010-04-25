@@ -125,6 +125,44 @@ class UTPS:
         self.D = D
         self.P = P
         
+        self.coeff = self.Coeff(self)
+        
+        
+    class Coeff:
+        """
+        helper class for UTPS that allows to extract the array of direction p
+        and degree d from UTPS.data as numpy array with the correct shape.
+        """
+        def __init__(self, x):
+            self.x = x
+            
+        def __getitem__(self, sl):
+            p,d = sl
+            if d >= self.x.D:
+                raise ValueError('d is too large')
+            if p >= self.x.P:
+                raise ValueError('p is too large')
+                
+            if d == 0:
+                return self.x.data[0]
+            
+            else:
+               return self.x.data[d + p*(self.x.D-1)]
+                
+        def __setitem__(self, sl, value):
+            p,d = sl
+            if d >= self.x.D:
+                raise ValueError('d is too large')
+            if p >= self.x.P:
+                raise ValueError('p is too large')
+                
+            if d == 0:
+                self.x.data[0] = value
+            
+            else:
+                self.x.data[d + p*(self.x.D-1)] = value
+        
+        
     def __str__(self):
         """ return human readable string representation"""
         return str(self.data)
@@ -210,17 +248,6 @@ class UTPS:
         
     def __gt__(self, other):
         return self.data[0] > other.data[0]
-
-def extract(x,p,d):
-    """
-    Extracts the d'th coefficients from a numpy.ndarray x of dtype object (UTPS)
-    and returns an numpy.ndarray of dtype=float.
-    """
-    shp = numpy.shape(x)
-    xr = numpy.ravel(x)
-    y = numpy.array([xn.data[(d>0)*(1 + p*d)] for xn in xr], dtype=float)
-    y.reshape(shp)
-    return y
 
 def convert2UTPS(x,y):
     """

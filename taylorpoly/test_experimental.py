@@ -6,13 +6,11 @@ from taylorpoly.utpm import *
 from taylorpoly.utps import *
 from taylorpoly.utils import *
 
-P, D = 2,3
+P, D, M , N = 2,3, 1,1
+x = numpy.array([UTPS(numpy.random.rand(P*(D-1) + 1), P = P) for i  in range(M*N)]).reshape((M,N))
+print x
+print x[0,0].coeff[0,1]
 
-x = UTPS(numpy.random.rand(P*(D-1) + 1), P = P)
-y = 2.
-
-print x * y
-print y * x
 
 # x, y = convert2UTPS(x,y)
 
