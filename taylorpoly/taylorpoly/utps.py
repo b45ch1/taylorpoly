@@ -222,6 +222,9 @@ class UTPS:
     def __pow__(self, r):
         return pow(self,r)
         
+    def sqrt(self):
+        return sqrt(self)
+        
     def sin(self):
         return sin(self)
         
