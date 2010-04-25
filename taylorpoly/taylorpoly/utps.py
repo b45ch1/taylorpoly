@@ -142,6 +142,9 @@ class UTPS:
         """ copies all data in self to a new instance """
         return self.__class__(self.data.copy(), self.P)
         
+    def __neg__(self):
+        return neg(self)
+        
     def __add__(self, other):
         return add(self,other)
         
@@ -208,6 +211,17 @@ def extract(x,p,d):
     return y
     
 
+def neg(x, out = None):
+    """ computes y = -x in Taylor arithmetic """
+    if out == None:
+        out = x.copy()
+        
+    out.data *= -1.
+    
+    return out
+        
+    
+    
 
 def add(x,y, out = None):
     """ computes z = x+y in Taylor arithmetic

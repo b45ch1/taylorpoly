@@ -226,7 +226,7 @@ int utpm_solve(int P, int D, int N, int NRHS, int *ipiv, double *A, int *Astride
 
 int utpm_lu(int P, int D, int N, int *ipiv, double *A, int *Astrides, double *work){
     
-    /* compute A = P * L * U decomposition in Taylor arithmetic.    
+    /* compute A = P * L * U decomposition in Taylor arithmetic.
     
     FIXME:
     this algorithm is not fully implemented. Reason: Missing functionality of BLAS/LAPACK to treat
