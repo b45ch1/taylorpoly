@@ -3,16 +3,21 @@ import numpy
 import scipy.linalg as linalg
 from taylorpoly import *
 from taylorpoly.utpm import *
+from taylorpoly.utps import *
 from taylorpoly.utils import *
 
-P, D = 1,3
+P, D = 2,3
 
-x = UTPS(numpy.random.rand(D))
+x = UTPS(numpy.random.rand(P*(D-1) + 1), P = P)
+y = 2.
 
-y = -x
+print x * y
+print y * x
 
-print x
-print y
+# x, y = convert2UTPS(x,y)
+
+# print y
+
 
 # P,D,N,M = 1,3,3,20
 # A = UTPM(numpy.random.rand((P*(D-1)+1)*N*N), shape = (N,N), P = P)

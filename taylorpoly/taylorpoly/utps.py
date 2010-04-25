@@ -156,6 +156,18 @@ class UTPS:
         
     def __div__(self, other):
         return div(self,other)
+        
+    def __radd__(self, other):
+        return add(other, self)
+        
+    def __rsub__(self, other):
+        return sub(other, self)
+        
+    def __rmul__(self, other):
+        return mul(other, self)
+        
+    def __rdiv__(self, other):
+        return div(other, self)
 
     def __iadd__(self, other):
         return add(self,other, out = self)
@@ -209,6 +221,34 @@ def extract(x,p,d):
     y = numpy.array([xn.data[(d>0)*(1 + p*d)] for xn in xr], dtype=float)
     y.reshape(shp)
     return y
+
+def convert2UTPS(x,y):
+    """
+    If either x or y is not an UTPS instance but a scalar quantity (e.g. a Float)
+    this function converts either x or y to an UTPS instance such that x and y
+    have the same P and same D.
+    
+    Rationale:
+    This function allows a workaround to do computations like::
+    
+        x = UTPS([1,2,3])
+        y = 3. * x
+        
+    by using algorithms that assume arithmetic on homogenous (i.e. same D same P)
+    Taylor polynomials.
+    """
+    
+    if not isinstance(x, UTPS):
+        out = y.__zeros_like__()
+        out.data[0] = x
+        x = out
+        
+    elif not isinstance(y, UTPS):
+        out = x.__zeros_like__()
+        out.data[0] = y
+        y = out
+        
+    return x,y
     
 
 def neg(x, out = None):
@@ -219,13 +259,11 @@ def neg(x, out = None):
     out.data *= -1.
     
     return out
-        
-    
-    
 
 def add(x,y, out = None):
     """ computes z = x+y in Taylor arithmetic
     """
+    x,y = convert2UTPS(x,y)
     if out == None:
         out = x.__zeros_like__()
         
@@ -243,6 +281,8 @@ def add(x,y, out = None):
 def sub(x,y, out = None):
     """ computes z = x-y in Taylor arithmetic
     """
+    x,y = convert2UTPS(x,y)
+
     if out == None:
         out = x.__zeros_like__()
         
@@ -260,6 +300,7 @@ def sub(x,y, out = None):
 def mul(x,y,out = None):
     """ computes z = x*y in Taylor arithmetic
     """
+    x,y = convert2UTPS(x,y)
     if out == None:
         out = x.__zeros_like__()
     
@@ -273,6 +314,7 @@ def mul(x,y,out = None):
 def div(x,y,out = None):
     """ computes z = x/y in Taylor arithmetic
     """
+    x,y = convert2UTPS(x,y)
     if out == None:
         out = x.__zeros_like__()
         
@@ -291,6 +333,7 @@ def div(x,y,out = None):
 def amul(x,y,out = None):
     """ computes z += x*y in Taylor arithmetic
     """
+    x,y = convert2UTPS(x,y)
     if out == None:
         out = x.__zeros_like__()
     
