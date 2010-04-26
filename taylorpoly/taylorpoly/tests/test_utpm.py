@@ -1,7 +1,7 @@
 from numpy.testing import TestCase, assert_array_almost_equal, assert_almost_equal, assert_equal
 import numpy
 
-from taylorpoly.utpm import UTPM, solve, add, sub, mul, dot, transpose
+from taylorpoly.utpm import *
 
 class test_global_functions(TestCase):
     def test_add(self):
@@ -35,13 +35,30 @@ class test_global_functions(TestCase):
             assert_array_almost_equal( z.coeff[p,0], x.coeff[p,0] * y.coeff[p,0])
             assert_array_almost_equal( z.coeff[p,1],  x.coeff[p,0] * y.coeff[p,1] + x.coeff[p,1] * y.coeff[p,0])
             assert_array_almost_equal( z.coeff[p,2],  x.coeff[p,0] * y.coeff[p,2] + x.coeff[p,1] * y.coeff[p,1] + x.coeff[p,2] * y.coeff[p,0])
-        
-        
-        
+
 
     def test_dot(self):
         P,D,M,K,N = 3,2,5,2,3
         x = UTPM(numpy.random.rand(P,D,M,K), shape = (M,K), P = P)
+        y = UTPM(numpy.random.rand(P,D,K,N), shape = (K,N), P = P)
+                                     
+        z = dot(x,y)
+        
+        assert_array_almost_equal(z.coeff[0,0], numpy.dot(x.coeff[0,0], y.coeff[0,0]))
+        for p in range(P):
+            assert_array_almost_equal(z.coeff[p,1], numpy.dot(x.coeff[p,1], y.coeff[p,0]) + numpy.dot(x.coeff[p,0], y.coeff[p,1]))
+            
+    
+        x = UTPM(numpy.random.rand(P,D,M,K), shape = (M,K), P = P)
+        y = UTPM(numpy.random.rand(P,D,K,N), shape = (N,K), P = P).T
+        
+        z = dot(x,y)
+        
+        assert_array_almost_equal(z.coeff[0,0], numpy.dot(x.coeff[0,0], y.coeff[0,0]))
+        for p in range(P):
+            assert_array_almost_equal(z.coeff[p,1], numpy.dot(x.coeff[p,1], y.coeff[p,0]) + numpy.dot(x.coeff[p,0], y.coeff[p,1]))
+                    
+        x = UTPM(numpy.random.rand(P,D,M,K), shape = (K,M), P = P).T
         y = UTPM(numpy.random.rand(P,D,K,N), shape = (K,N), P = P)
         
         z = dot(x,y)
@@ -49,14 +66,40 @@ class test_global_functions(TestCase):
         assert_array_almost_equal(z.coeff[0,0], numpy.dot(x.coeff[0,0], y.coeff[0,0]))
         for p in range(P):
             assert_array_almost_equal(z.coeff[p,1], numpy.dot(x.coeff[p,1], y.coeff[p,0]) + numpy.dot(x.coeff[p,0], y.coeff[p,1]))
+
+        x = UTPM(numpy.random.rand(P,D,M,K), shape = (K,M), P = P).T
+        y = UTPM(numpy.random.rand(P,D,K,N), shape = (N,K), P = P).T
         
+        z = dot(x,y)
+        
+        assert_array_almost_equal(z.coeff[0,0], numpy.dot(x.coeff[0,0], y.coeff[0,0]))
+        for p in range(P):
+            assert_array_almost_equal(z.coeff[p,1], numpy.dot(x.coeff[p,1], y.coeff[p,0]) + numpy.dot(x.coeff[p,0], y.coeff[p,1]))
+    
+
+    def test_dot_residual(self):
+        P,D,N,M = 3,4,3,2
+        x = UTPM(numpy.random.rand((P*(D-1)+1)*M*N), shape = (M,N), P = P)
+        y = UTPM(numpy.random.rand((P*(D-1)+1)*M*N), shape = (N,M), P = P)
+        
+        for d in range(D):
+            for p in range(P):
+                tmp = numpy.zeros((M,M))
+                for k in range(1,d):
+                    tmp +=  numpy.dot(x.coeff[p,d-k],  y.coeff[p,k])
+                assert_array_almost_equal(tmp, dot_residual(p, d, x,y))
+
     def test_solve(self):
-        P,D,N,M = 3,3,6,3
+        P,D,N,M = 3,3,10,20
+        
         A = UTPM(numpy.random.rand((P*(D-1)+1)*N*N), shape = (N,N), P = P)
         b = UTPM(numpy.random.rand((P*(D-1)+1)*N*M), shape = (N,M), P = P)
+        x, LU, ipiv = solve(A,b, fulloutput = True)
+        assert_array_almost_equal(dot(A,x).data,b.data)
         
-        x = solve(A,b)
-        
+        A = UTPM(numpy.random.rand((P*(D-1)+1)*N*N), shape = (N,N), P = P).T
+        b = UTPM(numpy.random.rand((P*(D-1)+1)*N*M), shape = (N,M), P = P)
+        x, LU, ipiv = solve(A,b, fulloutput = True)
         assert_array_almost_equal(dot(A,x).data,b.data)
         
 
@@ -88,6 +131,17 @@ class Test_UTPM_methods(TestCase):
         for p in range(P):
             for d in range(D):
                 assert_array_almost_equal(x.coeff[p,d].T, y.coeff[p,d])
+
+    def test_copy(self):
+        P,D,N,M = 3,3,10,20
+        A = UTPM(numpy.random.rand((P*(D-1)+1)*N*N), shape = (N,N), P = P).T
+        
+        
+        A2 = A.copy()
+        
+        assert_equal(A.allstrides, A2.allstrides)
+        assert_array_almost_equal(A.data, A2.data)
+
 
         # print A
         

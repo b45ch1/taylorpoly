@@ -32,10 +32,17 @@ _utpm.utpm_imul.argtypes = [c_int, c_int, c_int, c_int, c_double_ptr, c_int, c_d
 
 
 _utpm.utpm_dgemm.argtypes = [c_int, c_int, c_int,  c_int, c_int,  c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int, c_double, c_double_ptr, c_int]
-
 _utpm.utpm_daxpy.argtypes = [c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int]
 _utpm.utpm_dgesv.argtypes = [c_int, c_int, c_int, c_int, c_int, c_int, c_double_ptr, c_int, c_int_ptr, c_double_ptr, c_int]
 
+
+_utpm.utpm_dot.argtypes = [c_int, c_int, c_int, c_int, c_int, c_double, c_double_ptr, c_int_ptr, c_double_ptr, c_int_ptr, c_double, c_double_ptr, c_int_ptr]
+_utpm.utpm_solve.argtypes = [c_int, c_int, c_int, c_int, c_int_ptr, c_double_ptr, c_int_ptr, c_double_ptr, c_int_ptr]
+_utpm.utpm_lu.argtypes = [c_int, c_int, c_int,  c_int_ptr, c_double_ptr, c_int_ptr, c_double_ptr]
+
+# helper functions
+_utpm.utpm_dgemm_residual.argtypes = [c_int, c_int, c_int, c_int,  c_int, c_int,  c_int, c_int, c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int, c_double, c_double_ptr, c_int]
+_utpm.l_times_u.argtypes = [c_int, c_double, c_double_ptr, c_int, c_double_ptr, c_int, c_double_ptr, c_int]
 
 class UTPM:
     """
@@ -44,7 +51,7 @@ class UTPM:
     where R[[t]] are the formal power series over the field of real numbers R.
     """
     
-    def __init__(self, data, shape = (), P = 1):
+    def __init__(self, data, shape = (), P = 1, allstrides = None):
         """
         data = [x_0, x_{1,1}, x_{1,2}, ..., x_{1,P}, ..., x_{P,D-1}]
         is a flat, contiguous array of
@@ -82,9 +89,40 @@ class UTPM:
             self.P = P
             self.data = numpy.ravel(data)
             
+        self._Dstride = 8*numpy.prod(self._shape)
         self._strides = 8*numpy.array([numpy.prod(self._shape[:i]) for i in range(self.ndim)], dtype=int)
-        self.coeff = self.Coeff(self)
         
+        if allstrides != None:
+            self._Dstride = allstrides[0]
+            self._strides = allstrides[1:].copy()
+        
+        self.coeff = self.Coeff(self)
+    
+    @property
+    def is_transposed(self):
+        return (self.strides[-1] < self.strides[-2])
+    
+    @property
+    def cblas_transpose_code(self):
+        if self.is_transposed:
+            return 112
+        else:
+            return 111
+            
+    @property
+    def cblas_leadim(self):
+        if self.is_transposed == True:
+            return self._strides[-2] // 8
+        else:
+            return self._strides[-1] // 8
+            
+    @property
+    def allstrides(self):
+        return numpy.asarray( numpy.concatenate(([self._Dstride], self.strides)), dtype=ctypes.c_int)
+               
+    @property
+    def T(self):
+        return transpose(self)
         
     def get_ndim(self):
         return len(self._shape)
@@ -146,9 +184,7 @@ class UTPM:
         """ return human readable string representation"""
         ret_str =  '['
         ret_str += str(utils.as_strided(self.data[:numpy.prod(self._shape)], shape = self._shape, strides = self._strides)) + '],\n'
-        ret_str += '['
-        s = numpy.prod(self._strides)
-        ret_str += str(utils.as_strided(self.data[numpy.prod(self._shape):], shape = (self.P,self.D-1) + tuple(self._shape), strides = (self.D * s, s) + tuple(self._strides))) + ']'
+        ret_str += '['+ str(self.data[numpy.prod(self._shape):]) + ']'
         return ret_str
         
     def __repr__(self):
@@ -157,7 +193,7 @@ class UTPM:
 
     def copy(self):
         """ copies all data in self to a new instance """
-        return self.__class__(self.data.copy(), shape = self._shape, P = self.P)
+        return self.__class__(self.data.copy(), shape = self._shape, P = self.P, allstrides = self.allstrides)
         
     def __zeros_like__(self):
         """ returns a copy of self with all elements set to zero"""
@@ -260,6 +296,39 @@ def mul(x, y, out = None):
     return out
 
     
+# def dot(x,y, out = None):
+#     """ computes z = dot(x,y) in Taylor arithmetic
+
+#     """
+    
+#     if len(x._shape) != 2 or len(y._shape) != 2:
+#         raise NotImplementedError('only 2d arrays work right now')
+        
+#     if id(x) == id(y):
+#         raise ValueError('x and y may not be the same')
+        
+#     P,D,M,K,N = x.P, x.D, x._shape[0], x._shape[1], y._shape[1]
+    
+#     if x._shape[1] != y._shape[0]:
+#         raise ValueError('shape of x does not match shape of y')
+        
+#     if out == None:
+#         out = UTPM(numpy.zeros(N*M + (D-1) * N*M * P), P=P, shape = (M,N))
+        
+        
+#     print 'cblas_transpose_code= ',x.cblas_transpose_code, y.cblas_transpose_code
+
+#     A,B,C = x, y, out
+#     order = 102 # column major
+#     lda, ldb, ldc = x.cblas_leadim, y.cblas_leadim, M
+    
+#     print lda,ldb
+        
+#     _utpm.utpm_dgemm(P, D, order, x.cblas_transpose_code, y.cblas_transpose_code, M, N, K, 1., A.data.ctypes.data_as(c_double_ptr),
+#         lda, B.data.ctypes.data_as(c_double_ptr), ldb, 0., C.data.ctypes.data_as(c_double_ptr), ldc)
+    
+#     return out
+    
 def dot(x,y, out = None):
     """ computes z = dot(x,y) in Taylor arithmetic
 
@@ -273,21 +342,85 @@ def dot(x,y, out = None):
         
     P,D,M,K,N = x.P, x.D, x._shape[0], x._shape[1], y._shape[1]
     
+    if x._shape[1] != y._shape[0]:
+        raise ValueError('shape of x does not match shape of y')
+        
     if out == None:
         out = UTPM(numpy.zeros(N*M + (D-1) * N*M * P), P=P, shape = (M,N))
+
+    A,B,C = x, y, out
+    
+    Astrides = A.allstrides
+    Bstrides = B.allstrides
+    Cstrides = C.allstrides
+        
+    _utpm.utpm_dot(P, D, M, N, K, 1.,
+        A.data.ctypes.data_as(c_double_ptr),Astrides.ctypes.data_as(c_int_ptr),
+        B.data.ctypes.data_as(c_double_ptr),Bstrides.ctypes.data_as(c_int_ptr),
+        0,
+        C.data.ctypes.data_as(c_double_ptr),Cstrides.ctypes.data_as(c_int_ptr))
+    
+    return out
+    
+    
+
+def dot_residual(p, d, x,y, out = None):
+    """
+    x,y are UTPM instances
+    
+    p, direction
+    d, current degree
+    """
+    
+    if len(x._shape) != 2 or len(y._shape) != 2:
+        raise NotImplementedError('only 2d arrays work right now')
+        
+    P,D,M,K,N = x.P, x.D, x._shape[0], x._shape[1], y._shape[1]
+    
+    if x._shape[1] != y._shape[0]:
+        raise ValueError('shape of x does not match shape of y')
+    
+    if out == None:
+        out = numpy.zeros((M,N), order = 'F' )
 
     A,B,C = x, y, out
     order = 102 # column major
     trans = 111 # no trans
     lda, ldb, ldc = M, K, M
         
-    _utpm.utpm_dgemm(P, D, order, trans, trans, M, N, K, 1., A.data.ctypes.data_as(c_double_ptr),
-        lda, B.data.ctypes.data_as(c_double_ptr), ldb, 0., C.data.ctypes.data_as(c_double_ptr), ldc)
+    _utpm.utpm_dgemm_residual(p, D, d, order, trans, trans, M, N, K, 1., A.data.ctypes.data_as(c_double_ptr),
+        lda, B.data.ctypes.data_as(c_double_ptr), ldb, 0., C.ctypes.data_as(c_double_ptr), ldc)
     
     return out
+    
 
 
-def solve(A,B):
+
+# def solve(A,B):
+#     """
+#     solves A X = B in Taylor arithmetic
+#     """
+    
+#     A = A.copy()
+#     B = B.copy()
+    
+#     P,D = A.P,A.D
+#     order = 102 # col major 102 # row major 101
+#     trans = 111 # no trans
+    
+#     N = A._shape[0]
+#     NRHS = B._shape[1]
+#     lda = N
+#     ipiv = numpy.zeros(N,dtype=int)
+#     ldb = N
+
+#     _utpm.utpm_dgesv(P,D, order,trans, N, NRHS, A.data.ctypes.data_as(c_double_ptr),
+#         lda, ipiv.ctypes.data_as(c_int_ptr), B.data.ctypes.data_as(c_double_ptr), ldb)
+    
+#     return B
+
+
+def solve(A,B, fulloutput = False):
     """
     solves A X = B in Taylor arithmetic
     """
@@ -296,16 +429,42 @@ def solve(A,B):
     B = B.copy()
     
     P,D = A.P,A.D
-    order = 102 # col major 102 # row major 101
-    trans = 111 # no trans
     
     N = A._shape[0]
     NRHS = B._shape[1]
-    lda = N
-    ipiv = numpy.zeros(N,dtype=int)
-    ldb = N
-
-    _utpm.utpm_dgesv(P,D, order,trans, N, NRHS, A.data.ctypes.data_as(c_double_ptr),
-        lda, ipiv.ctypes.data_as(c_int_ptr), B.data.ctypes.data_as(c_double_ptr), ldb)
     
-    return B
+    Astrides = A.allstrides
+    Bstrides = B.allstrides
+    
+    ipiv = numpy.zeros(N,dtype=ctypes.c_int)
+    
+    # print 'Astrides = ', Astrides
+    
+    _utpm.utpm_solve(P, D, N, NRHS, ipiv.ctypes.data_as(c_int_ptr),
+        A.data.ctypes.data_as(c_double_ptr), Astrides.ctypes.data_as(c_int_ptr),
+        B.data.ctypes.data_as(c_double_ptr), Bstrides.ctypes.data_as(c_int_ptr))
+        
+    if(fulloutput == True):
+        return (B,A,ipiv)
+    else:
+        return B
+    
+# def lu(A):
+#     """ computes the LU decomposition, i.e. L U = A in Taylor arithmetic """
+#     # _utpm.utpm_solve.argtypes = [c_int, c_int, c_int, c_int, c_int_ptr, c_double_ptr, c_int_ptr, c_double_ptr, c_int_ptr]
+
+#     A = A.copy()
+#     P,D = A.P,A.D
+#     N = A._shape[0]
+#     Astrides = A.allstrides
+#     ipiv = numpy.zeros(N,dtype=ctypes.c_int)
+    
+#     work = numpy.zeros(12, dtype=ctypes.c_double)
+    
+#     _utpm.utpm_lu(P,D,N,ipiv.ctypes.data_as(c_int_ptr),
+#         A.data.ctypes.data_as(c_double_ptr), Astrides.ctypes.data_as(c_int_ptr), work.ctypes.data_as(c_double_ptr))
+     
+#     return A
+
+
+
