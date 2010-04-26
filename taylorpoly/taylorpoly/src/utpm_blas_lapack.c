@@ -134,7 +134,6 @@ int utpm_dgemm(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA
     
 }
 
-
 int utpm_dgesv(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                   int N, int NRHS,
                   double *A, int lda, int *ipiv,
