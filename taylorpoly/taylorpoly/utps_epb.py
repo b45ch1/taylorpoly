@@ -64,12 +64,15 @@ def epb_div(x,y,z, zbar, xbar, ybar):
     Warning: this function changes the value of z!
     """
     
-    _utps.utps_epb_div(x.P,x.D,
+    err_code = _utps.utps_epb_div(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
     z.data.ctypes.data_as(double_ptr),
     zbar.data.ctypes.data_as(double_ptr),
     xbar.data.ctypes.data_as(double_ptr),
     ybar.data.ctypes.data_as(double_ptr))
+    
+    if err_code != 0:
+        raise Exception('error in epb_div')
     
     return (xbar, ybar)

@@ -334,11 +334,14 @@ def mul(x,y,out = None):
     if out == None:
         out = x.__zeros_like__()
     
-    _utps.utps_mul(x.P,x.D,
+    success = _utps.utps_mul(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
     out.data.ctypes.data_as(double_ptr))
     
+    if success != 0:
+        raise Exception('div failed')
+        
     return out
     
 def div(x,y,out = None):
@@ -353,10 +356,13 @@ def div(x,y,out = None):
         out.data[0] = 1.
         return out
         
-    _utps.utps_div(x.P,x.D,
+    success = _utps.utps_div(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
     out.data.ctypes.data_as(double_ptr))
+    
+    if success != 0:
+        raise Exception('div failed')
     
     return out
     
@@ -367,10 +373,13 @@ def amul(x,y,out = None):
     if out == None:
         out = x.__zeros_like__()
     
-    _utps.utps_amul(x.P,x.D,
+    success = _utps.utps_amul(x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
     out.data.ctypes.data_as(double_ptr))
+    
+    if success != 0:
+        raise Exception('div failed')
     
     return out
     

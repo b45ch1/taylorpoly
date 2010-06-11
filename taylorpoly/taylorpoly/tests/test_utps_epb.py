@@ -54,11 +54,45 @@ class Test_global_funcs(TestCase):
         xbar = UTPS(numpy.zeros(3), P = 1)
         ybar = UTPS(numpy.zeros(3), P = 1)
         
-        xbar2 = zbar *z
-        ybar2 = zbar * z * z
+        xbar2 = zbar/y
+        ybar2 = - zbar*z/y
         epb_div(x,y,z, zbar, xbar, ybar)
         
         assert_array_almost_equal(xbar2.data, xbar.data)
         assert_array_almost_equal(ybar2.data, ybar.data)
+        
+        
+    def test_compare_pushforward_pullback_derivatives(self):
+        x = UTPS(numpy.array([7.,1.,0.]), P = 1)
+        y = UTPS(numpy.array([13.,0.,0.]), P = 1)
+        v1 = mul(x,y)
+        v2 = mul(x,v1)
+        
+        v2bar = UTPS([1.,0.,0.], P = 1)
+        v1bar = UTPS(numpy.zeros(3), P = 1)
+        xbar = UTPS(numpy.zeros(3), P = 1)
+        ybar = UTPS(numpy.zeros(3), P = 1)
+        
+        epb_mul(x,v1,v2, v2bar, xbar, v1bar)
+        epb_mul(x,y,v1, v1bar, xbar, ybar)
+        
+        assert_array_almost_equal(xbar.data[0], v2.data[1])
+        assert_array_almost_equal(xbar.data[1], 2*v2.data[2])
+        
+    def test_compare_pushforward_pullback_derivatives2(self):
+        x = UTPS(numpy.array([1.,0.,0.,0.]), P = 1)
+        y = UTPS(numpy.array([2.,1.,0.,0.]), P = 1)
+        z = div(x,y)
+        
+        zbar = UTPS([1.,0.,0., 0.], P = 1)
+        xbar = UTPS(numpy.zeros(4), P = 1)
+        ybar = UTPS(numpy.zeros(4), P = 1)
+        
+        epb_div(x,y,z, zbar, xbar, ybar)
+        
+        facs = numpy.array([1.,1.,2.,6.])
+        
+        assert_array_almost_equal((z.data*facs)[1:], (ybar.data*facs)[:-1])
+
         
 
