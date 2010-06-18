@@ -103,14 +103,17 @@ class UTPS:
         To allow vectorized operations (i.e. propagating several directional derivatives at once),
         the following memory layout is used:
         
-        x = [x_0, x_{1,1}, x_{1,2}, ..., x_{1,P}, ..., x_{D-1,P}]
+        x = [x_0, x_{1,1}, x_{1,2}, ..., x_{1,D-1}, ..., x_{P, D-1}]
         i.e. x.size = (D-1)*P+1
     
     """
     
     def __init__(self, data, P = 1):
         """
-        x = [x_0, x_{1,1}, x_{1,2}, ..., x_{1,P}, ..., x_{D-1,P}]
+        x = [x_0, x_{1,1}, x_{1,2}, ..., x_{1,D-1}, ..., x_{P, D-1}]
+        
+        
+        i.e. x.data[1:] corresponds (P,D-1) tensor
         """
         
         D = (numpy.size(data)-1)//P + 1
@@ -150,10 +153,11 @@ class UTPS:
                return self.x.data[d + p*(self.x.D-1)]
                 
         def __setitem__(self, sl, value):
+            
             p,d = sl
             if d >= self.x.D:
                 raise ValueError('d is too large')
-            if p >= self.x.P:
+            if not isinstance(p,slice) and p >= self.x.P:
                 raise ValueError('p is too large')
                 
             if d == 0:
