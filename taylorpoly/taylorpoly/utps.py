@@ -108,12 +108,16 @@ class UTPS:
     
     """
     
-    def __init__(self, data, P = 1):
+    def __init__(self, data, P = 1, Q = 1):
         """
         x = [x_0, x_{1,1}, x_{1,2}, ..., x_{1,D-1}, ..., x_{P, D-1}]
         
         
         i.e. x.data[1:] corresponds (P,D-1) tensor
+        
+        if Q > 1, then the data structure of x is
+        x = [x[0], x[1],...,x[Q]], where each x[q] is as define above.
+        
         """
         
         D = (numpy.size(data)-1)//P + 1
@@ -127,6 +131,7 @@ class UTPS:
         self.data = numpy.ascontiguousarray(data, dtype=float)
         self.D = D
         self.P = P
+        self.Q = Q
         
         self.coeff = self.Coeff(self)
         
