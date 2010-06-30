@@ -9,6 +9,7 @@ A matrix is a 2D array.
 
 
 inline int utpm_imul(int P, int D, int M, int N, double *y, int ldy, double *x, int ldx){
+    /* computes Y *= X in Taylor arithmetic */
     
     int k,d,p;
     double *xd, *yd, *zd;

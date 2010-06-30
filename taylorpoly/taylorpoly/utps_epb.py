@@ -1,7 +1,7 @@
 import ctypes
 from taylorpoly.utps import _utps, double_ptr
 
-argtypes = [ctypes.c_int, ctypes.c_int,
+argtypes = [ctypes.c_int, ctypes.c_int, ctypes.c_int,
             double_ptr, double_ptr, double_ptr,
             double_ptr, double_ptr, double_ptr]
 
@@ -17,7 +17,7 @@ def epb_add(x,y,z, zbar, xbar, ybar):
     i.e. [zbar] d[z] = [zbar] d[x] + [zbar] d[y]
     """
     
-    _utps.utps_epb_add(x.P,x.D,
+    _utps.utps_epb_add(x.Q, x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
     z.data.ctypes.data_as(double_ptr),
@@ -32,7 +32,7 @@ def epb_sub(x,y,z, zbar, xbar, ybar):
     i.e. [zbar] d[z] = [zbar] d[x] - [zbar] d[y]
     """
     
-    _utps.utps_epb_sub(x.P,x.D,
+    _utps.utps_epb_sub(x.Q, x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
     z.data.ctypes.data_as(double_ptr),
@@ -47,7 +47,7 @@ def epb_mul(x,y,z, zbar, xbar, ybar):
     i.e. [zbar] d[z] = [zbar] [y] d[x] + [zbar] [x] d[y]
     """
     
-    _utps.utps_epb_mul(x.P,x.D,
+    _utps.utps_epb_mul(x.Q, x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
     z.data.ctypes.data_as(double_ptr),
@@ -64,7 +64,7 @@ def epb_div(x,y,z, zbar, xbar, ybar):
     Warning: this function changes the value of z!
     """
     
-    err_code = _utps.utps_epb_div(x.P,x.D,
+    err_code = _utps.utps_epb_div(x.Q, x.P,x.D,
     x.data.ctypes.data_as(double_ptr),
     y.data.ctypes.data_as(double_ptr),
     z.data.ctypes.data_as(double_ptr),

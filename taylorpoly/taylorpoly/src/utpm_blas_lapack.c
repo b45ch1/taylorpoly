@@ -120,7 +120,7 @@ inline int utpm_dgemm(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE
     -------------------
     
     FIXME: check if this is correct
-    if A CblasRowMajor then the leading dimension switches it's place.
+    if A CblasRowMajor then the leading dimension switches its place.
     E.g. A (M,K) CblasRowMajor matrix is a contiguous (M,lda) memory block
     
     The implementation decomposes the above expression as

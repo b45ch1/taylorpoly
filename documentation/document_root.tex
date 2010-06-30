@@ -14,9 +14,9 @@
 
 \usepackage[T1]{fontenc}
 
-\usepackage{amsmath,amsfonts,amsthm, mathtools}
+\usepackage{amsmath,amsfonts,amsthm}
 % \mathtoolsset{showonlyrefs,showmanualtags}
-\mathtoolsset{showmanualtags}
+% \mathtoolsset{showmanualtags}
 \usepackage{subeqnarray}
 \usepackage{latexsym}
 
@@ -43,7 +43,7 @@
 
 \input{commands}
 
-\title{Numpy Enhancement Proposal}
+\title{Univariate Taylor Polynomial Arithmetic}
 
 \author{Sebastian~F. Walter\footnote{\texttt{sebastian.walter@gmail.com}}}
 
@@ -53,7 +53,7 @@
 \maketitle
 
 \begin{abstract}
-We propose to implement algorithms for truncated univariate Taylor polynomials over scalars (UTPS). This algebraic structure is of fundamental importance, e.g. for higher order algorithmic differentiation or Taylor series integrators for ODEs/DAEs. The algorithms are vectorized in the higher order coefficients.
+This document collects a mathematical description of arithmetic on truncated univariate Taylor polynomials over scalars (UTPS). This algebraic structure is of fundamental importance, e.g. for higher order algorithmic differentiation or Taylor series integrators for ODEs/DAEs. The algorithms are vectorized in the higher order coefficients.
 \end{abstract}
 \paragraph{Rationale}
 A truncated univariate Taylor polynomial (UTP) $[x]_D := \sum_{d=0}^{D-1} x_d t^d,\; x \in \R$ is an element of the polynomial factor ring $R[t]/R[t] t^D$. The variable $t$ is a formal variable that satisfies $t^i t^j = t^{i+j}$. That means the polynomial $[x]_D$ is never evaluated for a numerical $t$. The UTPs are of high importance, e.g. for use in algorithmic differentiation (AD), high order polynomial models and Taylor series integrators of ODEs/DAEs. In the following we focus on the motivation from an AD point of view.
@@ -118,21 +118,21 @@ $\sqrt{x}$ & $ y_d = \frac{1}{2 y_0} \left[ x_d - \sum_{k=1}^{d-1} y_k y_{d-k} \
 \hline
 $ x^r$ & $ \tilde y_d = \frac{1}{x_0} \left[ r \sum_{k=1}^d y_{d-k} \tilde x_k - \sum_{k=1}^{d-1} x_{d-k} \tilde y_k \right]$ & $2 D^2$ & $2D$\\
 \hline
-$\sin(v)$ & $ \tilde s_d = \sum_{j=1}^d \tilde v_j c_{d-j}$  & $2 D^2$ & $3D$\\
-$\cos(v)$ & $ \tilde c_d = \sum_{j=1}^d - \tilde  v_j s_{d-j} $ & & \\ 
+$\sin(x)$ & $ \tilde s_d = \sum_{K=1}^d \tilde x_K c_{d-k}$  & $2 D^2$ & $3D$\\
+$\cos(x)$ & $ \tilde c_d = \sum_{k=1}^d - \tilde  x_k s_{d-k} $ & & \\ 
 \hline
-$\tan(v)$ & $\tilde  \phi_d = \sum_{j=1}^d w_{d-j} \tilde v_j $ & & \\ 
-& $\tilde w_d = 2 \sum_{j=1}^d \phi_{d-j} \tilde \phi_j$ & & \\ 
+$\tan(x)$ & $\tilde  y_d = \sum_{k=1}^d w_{d-k} \tilde x_k $ & & \\ 
+& $\tilde w_d = 2 \sum_{k=1}^d y_{d-k} \tilde y_k$ & & \\ 
 \hline
-$\arcsin(v)$ & $ \tilde \phi_d = w_0^{-1} \left( \tilde v_d - \sum_{j=1}^{d-1} w_{d-j} \tilde \phi_j \right)$& & \\ 
-& $ \tilde w_d = - \sum_{j=1}^d v_{d-j} \tilde \phi_j $ & & \\ 
+$\arcsin(x)$ & $ \tilde y_d = w_0^{-1} \left( \tilde x_d - \sum_{k=1}^{d-1} w_{d-k} \tilde y_k \right)$& & \\ 
+& $ \tilde w_d = - \sum_{k=1}^d x_{d-k} \tilde y_k $ & & \\ 
 \hline
-$\arctan(v)$ & $ \tilde \phi_d = w_0^{-1} \left( \tilde v_d - \sum_{j=1}^{d-1} w_{d-j} \tilde \phi_j \right)$& & \\ 
-& $ \tilde w_d = 2 \sum_{j=1}^d v_{d-j} \tilde v_j $ & & \\ 
+$\arctan(x)$ & $ \tilde y_d = w_0^{-1} \left( \tilde x_d - \sum_{k=1}^{d-1} w_{d-k} \tilde y_k \right)$& & \\ 
+& $ \tilde w_d = 2 \sum_{k=1}^d x_{d-k} \tilde x_k $ & & \\ 
 \hline
 \end{tabular}
 \caption{\label{tab:taylor_arithmetic_univariate}
-We use $\tilde v_j := j v_j$. The results have been adapted from \cite{Griewank2008EDP,Neidinger2005DfC}.
+We use $\tilde x_k := k x_k$. The results have been adapted from \cite{Griewank2008EDP,Neidinger2005DfC}.
 }
 \end{table}
 
