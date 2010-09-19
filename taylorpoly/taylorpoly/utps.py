@@ -260,6 +260,9 @@ class UTPS:
         
     def __gt__(self, other):
         return self.data[0] > other.data[0]
+        
+    def __float__(self):
+        return self.data[0]
 
 def convert2UTPS(x,y):
     """
