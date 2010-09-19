@@ -18,6 +18,7 @@ import os
 import ctypes
 import numpy
 
+from numpy.lib import stride_tricks
 import utils
 
 _utpm = numpy.ctypeslib.load_library('libutpm.so', os.path.dirname(__file__))
@@ -153,14 +154,14 @@ class UTPM:
                 raise ValueError('p is too large')
                 
             if d == 0:
-                return utils.as_strided(self.x.data[:numpy.prod(self.x._shape)], shape = self.x._shape, strides = self.x._strides)
+                return stride_tricks.as_strided(self.x.data[:numpy.prod(self.x._shape)], shape = self.x._shape, strides = self.x._strides)
             
             else:
                 N = numpy.prod(self.x._shape)
                 D = self.x.D
                 start = N + p * N * (D-1) + N*(d-1)
                 stop  = N + p * N * (D-1) + N*d
-                return utils.as_strided(self.x.data[start:stop], shape = self.x._shape, strides = self.x._strides)
+                return stride_tricks.as_strided(self.x.data[start:stop], shape = self.x._shape, strides = self.x._strides)
                 
         def __setitem__(self, sl, value):
             p,d = sl
@@ -183,7 +184,7 @@ class UTPM:
     def __str__(self):
         """ return human readable string representation"""
         ret_str =  '['
-        ret_str += str(utils.as_strided(self.data[:numpy.prod(self._shape)], shape = self._shape, strides = self._strides)) + '],\n'
+        ret_str += str(stride_tricks.as_strided(self.data[:numpy.prod(self._shape)], shape = self._shape, strides = self._strides)) + '],\n'
         ret_str += '['+ str(self.data[numpy.prod(self._shape):]) + ']'
         return ret_str
         
@@ -448,6 +449,21 @@ def solve(A,B, fulloutput = False):
         return (B,A,ipiv)
     else:
         return B
+        
+def inv(A):
+    """
+    solves A X = B in Taylor arithmetic
+    """
+    
+    P,D = A.P,A.D
+    N = A._shape[0]
+    
+    B = A.__zeros_like__()
+    B.coeff[0,0] = numpy.eye(N)
+    return solve(A,B)
+        
+        
+        
     
 # def lu(A):
 #     """ computes the LU decomposition, i.e. L U = A in Taylor arithmetic """

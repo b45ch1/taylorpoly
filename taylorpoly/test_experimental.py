@@ -6,10 +6,23 @@ from taylorpoly.utpm import *
 from taylorpoly.utps import *
 from taylorpoly.utils import *
 
-P, D, M , N = 2,3, 1,1
-x = numpy.array([UTPS(numpy.random.rand(P*(D-1) + 1), P = P) for i  in range(M*N)]).reshape((M,N))
-print x
-print x[0,0].coeff[0,1]
+P,D,N,M = 1,2,3,2
+
+A = UTPM(numpy.random.rand((P*(D-1)+1)*N*N), shape = (N,N), P = P)
+# print A
+# B = inv(A)
+
+# print dot(A,B)
+# print B
+
+# B = UTPM(numpy.zeros((P*(D-1)+1)*N*M), shape = (N,M), P = P)
+# B.coeff[0,0] = numpy.eye(N)
+
+# X = solve(A,B)
+               
+# print B
+# # print A.allstrides
+# print dot(A,X) - B
 
 
 # x, y = convert2UTPS(x,y)

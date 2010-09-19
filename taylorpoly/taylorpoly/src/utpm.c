@@ -2,13 +2,14 @@
 A matrix is a 2D array.
 */
 #include <cblas.h>
+#include <stdio.h>
 
 #include "utpm_helper_functions.h"
 #include "utpm_blas_lapack.h"
 
 
 
-inline int utpm_imul(int P, int D, int M, int N, double *y, int ldy, double *x, int ldx){
+int utpm_imul(int P, int D, int M, int N, double *y, int ldy, double *x, int ldx){
     /* computes Y *= X in Taylor arithmetic */
     
     int k,d,p;
@@ -82,8 +83,9 @@ int utpm_dot(int P, int D, int M, int N, int K, double alpha, double *A,
     C = alpha A B + C
     
     */
-    
-    // printf("Astrides[0] = %d, Astrides[1] = %d, Astrides[2] = %d\n",Astrides[0], Astrides[1], Astrides[2]);
+    /*
+    printf("Astrides[0] = %d, Astrides[1] = %d, Astrides[2] = %d\n",Astrides[0], Astrides[1], Astrides[2]);
+    */
     
     int k,d,p;
     double *Ad, *Bd, *Cd;
@@ -153,6 +155,7 @@ int utpm_dot(int P, int D, int M, int N, int K, double alpha, double *A,
     return 0;
     
 }
+
 
 
 int utpm_solve(int P, int D, int N, int NRHS, int *ipiv, double *A, int *Astrides,

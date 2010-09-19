@@ -1,8 +1,6 @@
 #ifndef UTPM_BLAS_LAPACK_H
 #define UTPM_BLAS_LAPACK_H
 
-#include "lapack.h"
-
 #include <cblas.h>
 #include <clapack.h>
 

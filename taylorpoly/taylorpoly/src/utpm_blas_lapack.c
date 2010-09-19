@@ -100,7 +100,7 @@ int utpm_dgemm_residual(int p, int D, int d, enum CBLAS_ORDER Order, enum CBLAS_
     
     
 
-inline int utpm_dgemm(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
+int utpm_dgemm(int P, int D, enum CBLAS_ORDER Order, enum CBLAS_TRANSPOSE TransA,
                  enum CBLAS_TRANSPOSE TransB, int M, int N,
                  int K, double alpha, double *A,
                  int lda, double *B, int ldb,
