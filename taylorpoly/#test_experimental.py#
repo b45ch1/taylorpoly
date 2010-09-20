@@ -1,5 +1,0 @@
-from numpy.testing import *
-import numpy
-from taylorpoly import *
-
-
