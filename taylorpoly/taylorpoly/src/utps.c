@@ -150,7 +150,7 @@ int utps_div(int P, int D, double *x, double *y, double *z ){
     return 0;
 }
 
-int utps_amul(int P, int D, double *x, double *y, double *z ){
+inline int utps_amul(int P, int D, double *x, double *y, double *z ){
     /*
     computes  z += mul(x,y) in Taylor arithmetic
     */
