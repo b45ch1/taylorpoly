@@ -250,15 +250,23 @@ class UTPS:
             return self.copy()
             
     def __le__(self, other):
+        if numpy.isscalar(other):
+            return self.data[0] <= other
         return self.data[0] <= other.data[0]
         
     def __ge__(self, other):
+        if numpy.isscalar(other):
+            return self.data[0] >= other
         return self.data[0] >= other.data[0]
         
     def __lt__(self, other):
+        if numpy.isscalar(other):
+            return self.data[0] < other
         return self.data[0] < other.data[0]
         
     def __gt__(self, other):
+        if numpy.isscalar(other):
+            return self.data[0] > other
         return self.data[0] > other.data[0]
         
     def __float__(self):
