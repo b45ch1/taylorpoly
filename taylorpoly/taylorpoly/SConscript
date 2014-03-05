@@ -1,3 +1,4 @@
 Import('env')
 utps = env.SharedLibrary(target='utps', source=['src/utps.c', 'src/utps_epb.c'])
+ctps = env.SharedLibrary(target='ctps', source=['src/ctps.c'])
 utpm = env.SharedLibrary(target='utpm', source=['src/utpm_blas_lapack.c','src/utpm.c', 'src/utpm_helper_functions.c'])

@@ -1,8 +1,8 @@
 #ifndef UTPM_BLAS_LAPACK_H
 #define UTPM_BLAS_LAPACK_H
 
-#include <cblas.h>
-#include <clapack.h>
+#include <atlas/cblas.h>
+#include <atlas/clapack.h>
 
 int utpm_daxpy(int P, int D, int N, double alpha, double *x, int incx, double *y, int incy);
 
