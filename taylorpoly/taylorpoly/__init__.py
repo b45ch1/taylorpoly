@@ -22,7 +22,7 @@ from numpy.testing import Tester
 test = Tester().test
 
 
-from taylorpoly.utps import UTPS, add, sub, mul, div, amul, sqrt, log, exp, pow, sin_cos, sin, cos
+from taylorpoly.utps import UTPS, add, sub, mul, div, amul, sqrt, log, exp, pow, sin_cos, sin, cos, utps_ndarray_get_coeff
 from taylorpoly.utps_epb import epb_add, epb_sub, epb_mul, epb_div
 #from taylorpoly.utils import *
 
